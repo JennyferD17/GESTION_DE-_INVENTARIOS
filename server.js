@@ -279,8 +279,6 @@ app.get('/api/ventas', async (req, res) => {
   res.json(data.ventas);
 });
 
-// Asegúrate de tener definida la ruta a tu archivo de productos al inicio del servidor
-const PRODUCTOS_FILE = path.join(__dirname, 'data', 'productos.json'); // Ajusta la ruta según tu proyecto
 /**
  * PUT /api/ventas/:id
  * Actualiza una venta existente

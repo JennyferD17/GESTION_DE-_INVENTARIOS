@@ -84,13 +84,13 @@ document.addEventListener('DOMContentLoaded', function () {
   if (spanClose) {
     spanClose.onclick = function () {
       modal.style.display = "none";
-    }
+    };
   }
   window.onclick = function (event) {
     if (event.target == modal) {
       modal.style.display = "none";
     }
-  }
+  };
 
   /**
    * Carga las ventas desde el backend y muestra la página actual.
@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /**
    * Carga productos y clientes para el formulario.
+   * AJUSTADO: Ahora pobla dinámicamente el elemento <select> de productos
    */
   async function loadData() {
     try {
@@ -126,6 +127,21 @@ document.addEventListener('DOMContentLoaded', function () {
       productos = await resProductos.json();
       clientes = await resClientes.json();
       console.log('Datos cargados:', productos.length, 'productos,', clientes.length, 'clientes');
+
+      // --- CAMBIO: Rellenar el elemento select de productos ---
+      const selectProducto = document.getElementById('idProducto');
+      if (selectProducto) {
+        selectProducto.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+        productos.forEach(p => {
+          const option = document.createElement('option');
+          option.value = p.id;
+          // Formateamos visualmente para el vendedor: Nombre - Precio (Stock disponible)
+          const precioFormateado = parseFloat(p.precio).toLocaleString('es-CO');
+          option.textContent = `${p.nombre} - $${precioFormateado} (Stock: ${p.stock || 0})`;
+          selectProducto.appendChild(option);
+        });
+      }
+
     } catch (err) {
       console.error('Error al cargar datos:', err);
     }
@@ -200,16 +216,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
   /**
    * Agregar producto a la venta.
+   * AJUSTADO: Lee el ID directamente desde el select y devuelve la selección a su estado base limpio
    */
   btnAgregarProducto.addEventListener('click', async function () {
-    const idProducto = document.getElementById('idProducto').value.trim();
+    const idProducto = document.getElementById('idProducto').value; // Removido .trim() innecesario para un select
     const cantidad = parseInt(document.getElementById('cantidadProducto').value) || 1;
+    
     if (!idProducto) {
-      if (window.ui && ui.showToast) ui.showToast('Ingrese un ID de producto', 'warning');
+      if (window.ui && ui.showToast) ui.showToast('Por favor, seleccione un producto de la lista', 'warning');
       return;
     }
+    
     const producto = productos.find(p => p.id == idProducto);
     if (producto) {
+      // Validación extra: Verificar si hay stock suficiente antes de añadir al carrito
+      if (producto.stock && cantidad > producto.stock) {
+        if (window.ui && ui.showToast) ui.showToast(`Stock insuficiente. Solo quedan ${producto.stock} unidades`, 'warning');
+        return;
+      }
+
       const existente = productosEnVenta.find(p => p.id == idProducto);
       if (existente) {
         existente.cantidad += cantidad;
@@ -222,9 +247,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
       }
       actualizarTablaProductos();
+      
+      // Reseteamos el selector al estado inicial por defecto ("-- Seleccione un producto --")
       document.getElementById('idProducto').value = '';
       document.getElementById('cantidadProducto').value = 1;
-      if (window.ui && ui.showToast) ui.showToast('Producto agregado', 'success');
+      if (window.ui && ui.showToast) ui.showToast('Producto agregado al carrito', 'success');
     } else {
       if (window.ui && ui.showToast) ui.showToast('Producto no encontrado', 'warning');
     }
@@ -258,6 +285,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('fechaVenta').value = today;
     document.getElementById('clienteVenta').value = '';
     document.getElementById('idCliente').value = '';
+    document.getElementById('idProducto').value = ''; // Limpiar select
   });
 
   /**
@@ -357,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Poblar formulario
         document.getElementById('clienteVenta').value = venta.cliente;
-        // Intentar buscar ID de cliente si es posible, o dejar vacío
         const clienteObj = clientes.find(c => c.nombre === venta.cliente);
         if (clienteObj) document.getElementById('idCliente').value = clienteObj.id;
 

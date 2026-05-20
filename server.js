@@ -279,31 +279,8 @@ app.get('/api/ventas', async (req, res) => {
   res.json(data.ventas);
 });
 
-/**
- * POST /api/ventas
- * Registra una nueva venta en el sistema
- * Soporta ventas con múltiples productos
- * Genera ID y fecha automáticamente si no se proporcionan
- */
-app.post('/api/ventas', async (req, res) => {
-  const nuevaVenta = req.body;
-
-  // Validación básica - requiere al menos el total
-  if (!nuevaVenta || !nuevaVenta.total) {
-    return res.status(400).json({ success: false, message: 'Datos incompletos de la venta.' });
-  }
-  // Generar ID si no existe
-  if (!nuevaVenta.id) nuevaVenta.id = Date.now();
-
-  // Generar fecha actual si no se proporciona
-  if (!nuevaVenta.fecha) nuevaVenta.fecha = new Date().toISOString();
-  const data = await readFile(VENTAS_FILE, { ventas: [] });
-  data.ventas.push(nuevaVenta);
-  await writeFile(VENTAS_FILE, data);
-
-  res.status(201).json({ success: true, message: 'Venta registrada correctamente.' });
-});
-
+// Asegúrate de tener definida la ruta a tu archivo de productos al inicio del servidor
+const PRODUCTOS_FILE = path.join(__dirname, 'data', 'productos.json'); // Ajusta la ruta según tu proyecto
 /**
  * PUT /api/ventas/:id
  * Actualiza una venta existente

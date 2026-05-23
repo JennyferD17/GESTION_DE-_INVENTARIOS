@@ -41,8 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
       <td>${cliente.telefono}</td>
       <td>${cliente.fecha}</td>
       <td>${cliente.pedidos || 0}</td>
-      <td>${cliente.comprado}</td>
-      <td>$${parseFloat(cliente.comprado || 0).toLocaleString('es-CO')}</td>
+       <td>$${parseFloat(cliente.comprado || 0).toLocaleString('es-CO')}</td>
       <td>
         <button class="btn-edit">✏️</button>
         <button class="btn-delete">🗑️</button>

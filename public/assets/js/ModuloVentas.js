@@ -1,9 +1,10 @@
 // ============================================
-// MODULO VENTAS - CORREGIDO
+// MODULO VENTAS 
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function () {
 
+  // Elementos del DOM
   const btnNuevaVenta = document.getElementById('btnNuevaVenta');
   const formularioVenta = document.getElementById('formularioVenta');
   const cancelarVenta = document.getElementById('cancelarVenta');
@@ -15,20 +16,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const idClienteInput = document.getElementById('idCliente');
   const clienteVentaInput = document.getElementById('clienteVenta');
-  const telefonoClienteInput = document.getElementById('telefonoCliente');
-  const emailClienteInput = document.getElementById('emailCliente');
 
   const selectProducto = document.getElementById('idProducto');
 
+  // Variables de estado
   let editingId = null;
   let productosEnVenta = [];
   let productos = [];
   let clientes = [];
   let salesData = [];
-  let pagination = null;
 
   // =========================
-  // CREAR FILA
+  // CREAR FILA DE LA TABLA
   // =========================
   function createRow(v) {
     const tr = document.createElement('tr');
@@ -51,42 +50,77 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // =========================
-  // CARGAR VENTAS
+  // CARGAR VENTAS DESDE EL API
   // =========================
   async function loadSales() {
-    const res = await fetch('/api/ventas');
-    const data = await res.json();
+    try {
+      const res = await fetch('/api/ventas');
+      const data = await res.json();
 
-    salesData = data;
-    tablaBody.innerHTML = '';
+      salesData = data;
+      tablaBody.innerHTML = '';
 
-    data.forEach(v => tablaBody.appendChild(createRow(v)));
+      data.forEach(v => tablaBody.appendChild(createRow(v)));
+    } catch (error) {
+      console.error('Error al cargar ventas:', error);
+    }
   }
 
   // =========================
-  // CARGAR DATOS
+  // CARGAR PRODUCTOS Y CLIENTES
   // =========================
   async function loadData() {
-    const [rProd, rCli] = await Promise.all([
-      fetch('/api/productos'),
-      fetch('/api/clientes')
-    ]);
+    try {
+      const [rProd, rCli] = await Promise.all([
+        fetch('/api/productos'),
+        fetch('/api/clientes')
+      ]);
 
-    productos = await rProd.json();
-    clientes = await rCli.json();
+      productos = await rProd.json();
+      clientes = await rCli.json();
 
-    selectProducto.innerHTML = '<option value="">-- Producto --</option>';
+      selectProducto.innerHTML = '<option value="">-- Seleccione un producto --</option>';
 
-    productos.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = `${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}`;
-      selectProducto.appendChild(opt);
-    });
+      productos.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}`;
+        selectProducto.appendChild(opt);
+      });
+    } catch (error) {
+      console.error('Error al cargar productos/clientes:', error);
+    }
   }
 
   // =========================
-  // BUSCAR CLIENTE
+  // EVENTO: BOTÓN NUEVA VENTA
+  // =========================
+  btnNuevaVenta.addEventListener('click', () => {
+    editingId = null;
+    formVenta.reset();
+    productosEnVenta = [];
+    renderProductos();
+    
+    // Asigna la fecha actual automáticamente en formato YYYY-MM-DD
+    document.getElementById('fechaVenta').value = new Date().toISOString().split('T')[0];
+    
+    // Muestra el formulario en pantalla
+    formularioVenta.style.display = 'block';
+    productosAgregados.style.display = 'none'; // Oculto hasta que agreguen algo
+  });
+
+  // =========================
+  // EVENTO: BOTÓN CANCELAR VENTA
+  // =========================
+  cancelarVenta.addEventListener('click', () => {
+    formVenta.reset();
+    productosEnVenta = [];
+    formularioVenta.style.display = 'none';
+    editingId = null;
+  });
+
+  // =========================
+  // BUSCAR CLIENTE POR ID (TAB)
   // =========================
   idClienteInput.addEventListener('keydown', (e) => {
     if (e.key !== 'Tab') return;
@@ -98,23 +132,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!cliente) {
       clienteVentaInput.value = '';
-      telefonoClienteInput.value = '';
-      emailClienteInput.value = '';
+      alert('Cliente no encontrado en el sistema.');
       return;
     }
 
     clienteVentaInput.value = cliente.nombre;
-    telefonoClienteInput.value = cliente.telefono || '';
-    emailClienteInput.value = cliente.email || '';
   });
 
   // =========================
-  // AGREGAR PRODUCTO
+  // AGREGAR PRODUCTO AL CARRITO
   // =========================
   btnAgregarProducto.addEventListener('click', () => {
-
     const id = selectProducto.value;
     const cantidad = Number(document.getElementById('cantidadProducto').value || 1);
+
+    if (!id) {
+      alert('Por favor, seleccione un producto.');
+      return;
+    }
 
     const producto = productos.find(p => p.id == id);
     if (!producto) return;
@@ -132,31 +167,39 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
+    // Mostrar la tabla de productos si estaba oculta
+    if (productosEnVenta.length > 0) {
+      productosAgregados.style.display = 'block';
+    }
+
     renderProductos();
+    
+    // Resetear selección de producto y cantidad por comodidad
+    selectProducto.value = '';
+    document.getElementById('cantidadProducto').value = '1';
   });
 
   // =========================
-  // RENDER PRODUCTOS
+  // RENDERIZAR TABLA DE PRODUCTOS AGRUPADOS
   // =========================
   function renderProductos() {
-
     listaProductosVenta.innerHTML = '';
-
     let total = 0;
 
     productosEnVenta.forEach((p, i) => {
-
       const subtotal = p.precio * p.cantidad;
       total += subtotal;
 
       const tr = document.createElement('tr');
 
       tr.innerHTML = `
-        <td>${p.nombre}</td>
-        <td>${p.cantidad}</td>
-        <td>$${p.precio.toLocaleString('es-CO')}</td>
-        <td>$${subtotal.toLocaleString('es-CO')}</td>
-        <td><button data-i="${i}" class="del">🗑️</button></td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${p.nombre}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">${p.cantidad}</td>
+        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">$${p.precio.toLocaleString('es-CO')}</td>
+        <td style="padding: 8px; text-align: right; border: 1px solid #ddd;">$${subtotal.toLocaleString('es-CO')}</td>
+        <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">
+          <button data-i="${i}" class="del" type="button" style="background: none; border: none; cursor: pointer;">🗑️</button>
+        </td>
       `;
 
       listaProductosVenta.appendChild(tr);
@@ -165,21 +208,32 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('totalVenta').value = total;
   }
 
+  // ELIMINAR UN PRODUCTO DEL CARRITO
   listaProductosVenta.addEventListener('click', (e) => {
-    if (!e.target.classList.contains('del')) return;
+    // Busca si el clic fue en el botón de basura o dentro de él
+    const botonBorrar = e.target.closest('.del');
+    if (!botonBorrar) return;
 
-    const i = e.target.dataset.i;
+    const i = botonBorrar.dataset.i;
     productosEnVenta.splice(i, 1);
+    
+    if (productosEnVenta.length === 0) {
+      productosAgregados.style.display = 'none';
+    }
+    
     renderProductos();
   });
 
   // =========================
-  // GUARDAR VENTA
+  // GUARDAR VENTA (SUBMIT FORM)
   // =========================
   formVenta.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    if (productosEnVenta.length === 0) return;
+    if (productosEnVenta.length === 0) {
+      alert('Debe añadir al menos un producto a la venta.');
+      return;
+    }
 
     const venta = {
       id: editingId || Date.now(),
@@ -195,21 +249,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const url = editingId ? `/api/ventas/${editingId}` : '/api/ventas';
     const method = editingId ? 'PUT' : 'POST';
 
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(venta)
-    });
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(venta)
+      });
 
-    productosEnVenta = [];
-    formVenta.reset();
-    formularioVenta.style.display = 'none';
-
-    loadSales();
+      if (response.ok) {
+        productosEnVenta = [];
+        formVenta.reset();
+        formularioVenta.style.display = 'none';
+        loadSales();
+      } else {
+        alert('Hubo un problema al intentar procesar la venta en el servidor.');
+      }
+    } catch (error) {
+      console.error('Error al guardar venta:', error);
+      alert('Error de conexión con el servidor.');
+    }
   });
 
   // =========================
-  // INIT
+  // INICIALIZACIÓN
   // =========================
   loadSales();
   loadData();

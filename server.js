@@ -593,14 +593,90 @@ app.post('/api/proveedores', async (req, res) => {
 // VENTAS
 // ============================================
 
-app.get('/api/ventas', async (req, res) => {
+app.post('/api/ventas', async (req, res) => {
 
-  const data = await readFile(
-    VENTAS_FILE,
-    { ventas: [] }
-  );
+  try {
 
-  res.json(data.ventas || []);
+    const venta =
+      req.body;
+
+    const data =
+      await readFile(
+        VENTAS_FILE,
+        { ventas: [] }
+      );
+
+    if (
+      !Array.isArray(
+        data.ventas
+      )
+    ) {
+
+      data.ventas = [];
+    }
+
+    data.ventas.push(venta);
+
+    await writeFile(
+      VENTAS_FILE,
+      data
+    );
+
+    // =========================
+    // ACTUALIZAR CLIENTE
+    // =========================
+
+    const clientesData =
+      await readFile(
+        CLIENTES_FILE,
+        { clientes: [] }
+      );
+
+    const cliente =
+      clientesData.clientes.find(
+        c =>
+          c.nombre ===
+          venta.cliente
+      );
+
+    if (cliente) {
+
+      cliente.pedidos =
+        (cliente.pedidos || 0) + 1;
+
+      cliente.comprado =
+        (cliente.comprado || 0) +
+        Number(venta.total);
+
+      cliente.fecha =
+        venta.fecha;
+    }
+
+    await writeFile(
+      CLIENTES_FILE,
+      clientesData
+    );
+
+    res.json({
+
+      success:true,
+
+      message:
+        'Venta guardada'
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    res.status(500).json({
+
+      success:false,
+
+      message:
+        'Error ventas'
+    });
+  }
 });
 
 // ============================================

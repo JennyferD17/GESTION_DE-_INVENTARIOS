@@ -1,5 +1,3 @@
-// ModuloCliente.js – Gestión de Clientes con paginación
-
 document.addEventListener('DOMContentLoaded', function () {
 
   const btnNuevoCliente = document.getElementById('btnNuevoCliente');
@@ -13,15 +11,32 @@ document.addEventListener('DOMContentLoaded', function () {
   let clientsData = [];
   let pagination = null;
 
-  /**
-   * Crear fila de cliente
-   */
+  function validarDocumento(tipo, numero) {
+    if (!numero) return false;
+
+    switch (tipo) {
+      case 'CC':
+        return /^[0-9]{6,12}$/.test(numero);
+      case 'NIT':
+        return /^[0-9]{9}-?[0-9]$/.test(numero);
+      case 'PEP':
+      case 'PPT':
+      case 'PAS':
+      case 'CE':
+        return /^[A-Z0-9\-]{6,20}$/.test(numero);
+      default:
+        return false;
+    }
+  }
+
   function createRow(cliente) {
     const tr = document.createElement('tr');
-    tr.dataset.id = cliente.id;
+    tr.dataset.id = cliente.idCliente;
 
     tr.innerHTML = `
-      <td>${cliente.id}</td>
+      <td>${cliente.idCliente}</td>
+      <td>${cliente.tipoDocumento}</td>
+      <td>${cliente.numeroDocumento}</td>
       <td>${cliente.nombre}</td>
       <td>${cliente.email}</td>
       <td>${cliente.telefono}</td>
@@ -29,24 +44,19 @@ document.addEventListener('DOMContentLoaded', function () {
       <td>${cliente.pedidos || 0}</td>
       <td>$${parseFloat(cliente.comprado || 0).toLocaleString('es-CO')}</td>
       <td>
-        <button class="btn-edit" title="Editar"><span class="icono">✏️</span></button>
-        <button class="btn-delete" title="Eliminar"><span class="icono eliminar">🗑️</span></button>
+        <button class="btn-edit">✏️</button>
+        <button class="btn-delete">🗑️</button>
       </td>
     `;
-
     return tr;
   }
 
-  /**
-   * Cargar clientes
-   */
   async function loadClients() {
     try {
       const res = await fetch('/api/clientes');
       const clients = await res.json();
 
       clientsData = clients;
-
       pagination = new Pagination(clientsData, 10);
 
       const render = () => {
@@ -61,136 +71,97 @@ document.addEventListener('DOMContentLoaded', function () {
       pagination.renderControls('paginationClientes');
 
     } catch (err) {
-      console.error('Error al cargar clientes:', err);
+      console.error(err);
     }
   }
 
   loadClients();
 
-  /**
-   * Filtro
-   */
-  if (filtroInput) {
-    filtroInput.addEventListener('input', function () {
-      const term = this.value.toLowerCase();
+  filtroInput.addEventListener('input', function () {
+    const term = this.value.toLowerCase();
 
-      const filtered = clientsData.filter(c =>
-        Object.values(c).some(v =>
-          String(v).toLowerCase().includes(term)
-        )
-      );
+    const filtered = clientsData.filter(c =>
+      Object.values(c).some(v =>
+        String(v).toLowerCase().includes(term)
+      )
+    );
 
-      pagination.updateItems(filtered);
-      pagination.renderControls('paginationClientes');
-      pagination.onPageChange();
-    });
-  }
-
-  /**
-   * Abrir formulario
-   */
-  function openForm(edit = false) {
-    formularioCliente.style.display = 'block';
-    formularioCliente.classList.toggle('editing', edit);
-
-    const btn = formCliente.querySelector('button[type="submit"]');
-    if (btn) {
-      btn.textContent = edit ? 'Actualizar' : 'Guardar';
-      btn.classList.toggle('update', edit);
-    }
-  }
-
-  btnNuevoCliente.addEventListener('click', function () {
-    editingId = null;
-    formCliente.reset();
-    openForm(false);
+    pagination.updateItems(filtered);
+    pagination.renderControls('paginationClientes');
+    pagination.onPageChange();
   });
 
-  cancelarCliente.addEventListener('click', function () {
+  btnNuevoCliente.addEventListener('click', () => {
     editingId = null;
+    formCliente.reset();
+    formularioCliente.style.display = 'block';
+  });
+
+  cancelarCliente.addEventListener('click', () => {
     formularioCliente.style.display = 'none';
     formCliente.reset();
+    editingId = null;
   });
 
-  /**
-   * Guardar cliente (CORREGIDO)
-   */
   formCliente.addEventListener('submit', async function (e) {
     e.preventDefault();
 
-    const nombre = document.getElementById('nombreCliente').value.trim();
-    const email = document.getElementById('emailCliente').value.trim();
-    const telefono = document.getElementById('telefonoCliente').value.trim();
-    const fecha = document.getElementById('fechaRegistro').value;
+    const tipoDocumento = document.getElementById('tipoDocumento').value;
+    const numeroDocumento = document.getElementById('numeroDocumento').value.trim();
+
+    if (!validarDocumento(tipoDocumento, numeroDocumento)) {
+      alert('Documento inválido');
+      return;
+    }
 
     const cliente = {
-      id: editingId || Date.now(),
-      nombre,
-      email,
-      telefono,
-      fecha,
-
-      // 🔥 IMPORTANTE: siempre inician en 0
+      idCliente: editingId || crypto.randomUUID(),
+      tipoDocumento,
+      numeroDocumento,
+      nombre: document.getElementById('nombreCliente').value.trim(),
+      email: document.getElementById('emailCliente').value.trim(),
+      telefono: document.getElementById('telefonoCliente').value.trim(),
+      fecha: document.getElementById('fechaRegistro').value,
       pedidos: 0,
       comprado: 0
     };
 
-    try {
-      const res = await fetch('/api/clientes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(cliente)
-      });
+    const res = await fetch('/api/clientes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cliente)
+    });
 
-      if (res.ok) {
-        if (window.ui?.showToast) ui.showToast('Cliente guardado', 'success');
-        loadClients();
-      } else {
-        if (window.ui?.showToast) ui.showToast('Error al guardar', 'error');
-      }
-
-    } catch (err) {
-      console.error('Error:', err);
+    if (res.ok) {
+      loadClients();
     }
 
     formularioCliente.style.display = 'none';
-    editingId = null;
     formCliente.reset();
   });
 
-  /**
-   * Editar / eliminar
-   */
   tablaBody.addEventListener('click', function (e) {
-
-    const btnEdit = e.target.closest('.btn-edit');
-    const btnDelete = e.target.closest('.btn-delete');
     const row = e.target.closest('tr');
-
     if (!row) return;
 
-    const id = row.dataset.id ? parseInt(row.dataset.id, 10) : null;
+    const id = row.dataset.id;
 
-    if (btnEdit) {
-      if (!id) return;
-
+    if (e.target.classList.contains('btn-edit')) {
       const cells = row.querySelectorAll('td');
 
-      document.getElementById('nombreCliente').value = cells[1].textContent;
-      document.getElementById('emailCliente').value = cells[2].textContent;
-      document.getElementById('telefonoCliente').value = cells[3].textContent;
-      document.getElementById('fechaRegistro').value = cells[4].textContent;
+      document.getElementById('tipoDocumento').value = cells[1].textContent;
+      document.getElementById('numeroDocumento').value = cells[2].textContent;
+      document.getElementById('nombreCliente').value = cells[3].textContent;
+      document.getElementById('emailCliente').value = cells[4].textContent;
+      document.getElementById('telefonoCliente').value = cells[5].textContent;
+      document.getElementById('fechaRegistro').value = cells[6].textContent;
 
       editingId = id;
-      openForm(true);
+      formularioCliente.style.display = 'block';
     }
 
-    if (btnDelete) {
-      if (!id) return;
-
-      if (confirm('¿Eliminar este cliente?')) {
-        if (window.ui?.showToast) ui.showToast('Eliminar pendiente en backend', 'info');
-      }
+    if (e.target.classList.contains('btn-delete')) {
+      alert('Eliminar pendiente backend');
     }
   });
 

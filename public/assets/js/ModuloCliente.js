@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
     tr.dataset.id = cliente.idCliente;
 
     tr.innerHTML = `
+     <td>${cliente.tipoDocumento}</td>
       <td>${cliente.idCliente}</td>
-      <td>${cliente.tipoDocumento}</td>
       <td>${cliente.numeroDocumento}</td>
       <td>${cliente.nombre}</td>
       <td>${cliente.email}</td>

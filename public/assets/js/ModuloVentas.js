@@ -7,12 +7,12 @@ let productos = [];        // Lista completa de productos cargados desde el serv
 let productosEnVenta = []; // Carrito local de la venta actual
 
 // Elementos del DOM
-const formVenta = document.getElementById('form_ventas');
-const selectProducto = document.getElementById('producto_venta');
-const inputCantidad = document.getElementById('cantidad_venta');
-const btnAgregar = document.getElementById('btn_agregar_producto');
-const tablaCuerpoVenta = document.getElementById('tabla_cuerpo_venta');
-const totalVentaElem = document.getElementById('total_venta');
+const formVenta = document.getElementById('formVenta');
+const selectProducto = document.getElementById('idProducto');
+const inputCantidad = document.getElementById('cantidadProducto');
+const tablaBody = document.querySelector('#tablaVentas tbody');
+const listaProductosVenta = document.getElementById('listaProductosVenta');
+const totalVentaElem = document.getElementById('totalVenta');
 
 /**
  * 1. Inicialización y carga de datos desde el servidor

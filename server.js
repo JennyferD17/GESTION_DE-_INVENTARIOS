@@ -651,4 +651,3 @@ app.listen(port, '0.0.0.0', () => {
     `Servidor iniciado puerto ${port}`
   );
 });
-como deberia estar

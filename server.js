@@ -301,6 +301,96 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ============================================
+// RESET PASSWORD
+// ============================================
+
+app.post(
+  '/api/reset-password',
+  async (req, res) => {
+
+    try {
+
+      const { correo } =
+        req.body;
+
+      if (!correo) {
+
+        return res.status(400).json({
+
+          success:false,
+
+          message:'Correo requerido'
+        });
+      }
+
+      const users =
+        await readFile(
+          USERS_FILE,
+          []
+        );
+
+      const user =
+        users.find(
+          u =>
+            u.correo ===
+            correo.toLowerCase()
+        );
+
+      if (!user) {
+
+        return res.status(404).json({
+
+          success:false,
+
+          message:'Usuario no encontrado'
+        });
+      }
+
+      // =========================
+      // NUEVA PASSWORD TEMPORAL
+      // =========================
+
+      const nuevaPassword =
+        'Temporal123';
+
+      user.password =
+        hashPassword(
+          nuevaPassword
+        );
+
+      await writeFile(
+        USERS_FILE,
+        users
+      );
+
+      console.log(
+        'Nueva password:',
+        nuevaPassword
+      );
+
+      res.json({
+
+        success:true,
+
+        message:
+          'Contraseña restablecida. Contacte al administrador.'
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+
+        success:false,
+
+        message:'Error reset password'
+      });
+    }
+  }
+);
+
+// ============================================
 // PRODUCTOS
 // ============================================
 

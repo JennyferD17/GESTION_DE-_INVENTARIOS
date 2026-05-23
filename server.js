@@ -69,7 +69,20 @@ async function writeFile(filePath, data) {
 
 app.get('/api/clientes', async (req, res) => {
   const data = await readFile(CLIENTES_FILE, { clientes: [] });
-  res.json(data.clientes);
+
+  const normalizados = data.clientes.map(c => ({
+    idCliente: c.idCliente || c.id,
+    tipoDocumento: c.tipoDocumento || 'CC',
+    numeroDocumento: c.numeroDocumento || 'SIN_REGISTRO',
+    nombre: c.nombre,
+    email: c.email,
+    telefono: c.telefono,
+    fecha: c.fecha,
+    pedidos: c.pedidos || 0,
+    comprado: c.comprado || 0
+  }));
+
+  res.json(normalizados);
 });
 
 app.post('/api/clientes', async (req, res) => {

@@ -2,6 +2,8 @@
   "clientes": [
     {
       "id": 1764101209153,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "123456789",
       "nombre": "Juan Perez",
       "email": "juan@example.com",
       "telefono": "123456789",
@@ -11,6 +13,8 @@
     },
     {
       "id": 1764101209162,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "987654321",
       "nombre": "Maria Lopez",
       "email": "maria@example.com",
       "telefono": "987654321",
@@ -20,6 +24,8 @@
     },
     {
       "id": 1764101209171,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "555666777",
       "nombre": "Carlos Ruiz",
       "email": "carlos@example.com",
       "telefono": "555666777",
@@ -30,6 +36,8 @@
 
     {
       "id": 1764103872779,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552000",
       "nombre": "Juan Pérez",
       "email": "juan.pérez@email.com",
       "telefono": "5552000",
@@ -39,6 +47,8 @@
     },
     {
       "id": 1764103872807,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552001",
       "nombre": "María González",
       "email": "maría.gonzález@email.com",
       "telefono": "5552001",
@@ -48,6 +58,8 @@
     },
     {
       "id": 1764103872825,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552002",
       "nombre": "Carlos Rodríguez",
       "email": "carlos.rodríguez@email.com",
       "telefono": "5552002",
@@ -57,6 +69,8 @@
     },
     {
       "id": 1764103872831,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552003",
       "nombre": "Ana Martínez",
       "email": "ana.martínez@email.com",
       "telefono": "5552003",
@@ -66,6 +80,8 @@
     },
     {
       "id": 1764103872840,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552004",
       "nombre": "Luis Fernández",
       "email": "luis.fernández@email.com",
       "telefono": "5552004",
@@ -75,6 +91,8 @@
     },
     {
       "id": 1764103872846,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552005",
       "nombre": "Carmen López",
       "email": "carmen.lópez@email.com",
       "telefono": "5552005",
@@ -84,6 +102,8 @@
     },
     {
       "id": 1764103872851,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552006",
       "nombre": "José Sánchez",
       "email": "josé.sánchez@email.com",
       "telefono": "5552006",
@@ -93,6 +113,8 @@
     },
     {
       "id": 1764103872857,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552007",
       "nombre": "Laura Ramírez",
       "email": "laura.ramírez@email.com",
       "telefono": "5552007",
@@ -102,6 +124,8 @@
     },
     {
       "id": 1764103872863,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552008",
       "nombre": "Miguel Torres",
       "email": "miguel.torres@email.com",
       "telefono": "5552008",
@@ -111,6 +135,8 @@
     },
     {
       "id": 1764103872869,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552009",
       "nombre": "Isabel Flores",
       "email": "isabel.flores@email.com",
       "telefono": "5552009",
@@ -120,8 +146,10 @@
     },
     {
       "id": 1764103872875,
+      "tipoDocumento": "NIT",
+      "numeroDocumento": "5552010",
       "nombre": "TechCorp S.A.",
-      "email": "techcorp.s.a.@email.com",
+      "email": "techcorp@email.com",
       "telefono": "5552010",
       "fecha": "2025-09-01",
       "pedidos": 8,
@@ -129,8 +157,10 @@
     },
     {
       "id": 1764103872881,
+      "tipoDocumento": "NIT",
+      "numeroDocumento": "5552011",
       "nombre": "Innovatech Ltda",
-      "email": "innovatech.ltda@email.com",
+      "email": "innovatech@email.com",
       "telefono": "5552011",
       "fecha": "2025-11-13",
       "pedidos": 14,
@@ -138,8 +168,10 @@
     },
     {
       "id": 1764103872887,
+      "tipoDocumento": "NIT",
+      "numeroDocumento": "5552012",
       "nombre": "Digital Solutions",
-      "email": "digital.solutions@email.com",
+      "email": "digital@email.com",
       "telefono": "5552012",
       "fecha": "2025-11-25",
       "pedidos": 10,
@@ -147,8 +179,10 @@
     },
     {
       "id": 1764103872893,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552013",
       "nombre": "Smart Business",
-      "email": "smart.business@email.com",
+      "email": "smart@email.com",
       "telefono": "5552013",
       "fecha": "2025-09-23",
       "pedidos": 6,
@@ -156,8 +190,10 @@
     },
     {
       "id": 1764103872900,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552014",
       "nombre": "Future Tech",
-      "email": "future.tech@email.com",
+      "email": "future@email.com",
       "telefono": "5552014",
       "fecha": "2025-11-19",
       "pedidos": 2,
@@ -165,6 +201,8 @@
     },
     {
       "id": 1764103872905,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552015",
       "nombre": "Pedro Morales",
       "email": "pedro.morales@email.com",
       "telefono": "5552015",
@@ -174,6 +212,8 @@
     },
     {
       "id": 1764103872911,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552016",
       "nombre": "Sofía Castro",
       "email": "sofía.castro@email.com",
       "telefono": "5552016",
@@ -183,6 +223,8 @@
     },
     {
       "id": 1764103872917,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552017",
       "nombre": "Diego Vargas",
       "email": "diego.vargas@email.com",
       "telefono": "5552017",
@@ -192,6 +234,8 @@
     },
     {
       "id": 1764103872923,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552018",
       "nombre": "Valentina Ruiz",
       "email": "valentina.ruiz@email.com",
       "telefono": "5552018",
@@ -201,6 +245,8 @@
     },
     {
       "id": 1764103872929,
+      "tipoDocumento": "CC",
+      "numeroDocumento": "5552019",
       "nombre": "Andrés Mendoza",
       "email": "andrés.mendoza@email.com",
       "telefono": "5552019",

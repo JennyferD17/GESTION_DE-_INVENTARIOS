@@ -91,7 +91,7 @@ async function writeFile(filePath, data) {
     throw error;
   }
 }
-}
+
 
 // ============================================
 // ENDPOINTS DE LA API - USUARIOS
@@ -179,19 +179,29 @@ app.get('/api/users', async (req, res) => {
 
 /**
  * GET /api/productos
- * Obtiene la lista completa de productos
+ * Obtiene todos los productos
  */
-app.post('/api/productos', async (req, res) => {
+app.get('/api/productos', async (req, res) => {
+
   try {
 
-    const producto = req.body;
+    const data = await readFile(
+      PRODUCTOS_FILE,
+      { productos: [] }
+    );
 
-    if (!producto || !producto.nombre) {
-      return res.status(400).json({
-        success: false,
-        message: 'Datos incompletos'
-      });
-    }
+    res.json(data.productos);
+
+  } catch (error) {
+
+    console.error('ERROR OBTENIENDO PRODUCTOS:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Error obteniendo productos'
+    });
+  }
+});
 
     // =========================
     // PRODUCTOS
@@ -334,21 +344,61 @@ app.get('/api/proveedores', async (req, res) => {
  * Genera un ID automático si no se proporciona
  */
 app.post('/api/proveedores', async (req, res) => {
-  const nuevoProveedor = req.body;
 
-  // Validar datos mínimos del proveedor
-  if (!nuevoProveedor || !nuevoProveedor.nombre) {
-    return res.status(400).json({ success: false, message: 'Datos incompletos del proveedor.' });
+  try {
+
+    const nuevoProveedor = req.body;
+
+    if (!nuevoProveedor || !nuevoProveedor.nombre) {
+
+      return res.status(400).json({
+        success: false,
+        message: 'Datos incompletos del proveedor.'
+      });
+    }
+
+    const data = await readFile(
+      PROVEEDORES_FILE,
+      { proveedores: [] }
+    );
+
+    // Buscar si ya existe
+    const index = data.proveedores.findIndex(
+      p => p.id == nuevoProveedor.id
+    );
+
+    if (index !== -1) {
+
+      // Actualizar
+      data.proveedores[index] = nuevoProveedor;
+
+    } else {
+
+      // Crear nuevo
+      nuevoProveedor.id = Date.now();
+
+      data.proveedores.push(nuevoProveedor);
+    }
+
+    await writeFile(
+      PROVEEDORES_FILE,
+      data
+    );
+
+    res.json({
+      success: true,
+      message: 'Proveedor guardado correctamente.'
+    });
+
+  } catch (error) {
+
+    console.error('ERROR PROVEEDOR:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Error guardando proveedor.'
+    });
   }
-
-  // Generar ID si no existe
-  if (!nuevoProveedor.id) nuevoProveedor.id = Date.now();
-
-  const data = await readFile(PROVEEDORES_FILE, { proveedores: [] });
-  data.proveedores.push(nuevoProveedor);
-  await writeFile(PROVEEDORES_FILE, data);
-
-  res.status(201).json({ success: true, message: 'Proveedor agregado correctamente.' });
 });
 
 // ============================================

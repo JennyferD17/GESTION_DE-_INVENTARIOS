@@ -1,37 +1,38 @@
 {
   "clientes": [
     {
+      "id": 1764101209153,
       "nombre": "Juan Perez",
       "email": "juan@example.com",
       "telefono": "123456789",
       "fecha": "2023-01-15",
       "pedidos": 5,
-      "comprado": 6800000,
-      "id": 1764101209153
+      "comprado": 6800000
     },
     {
+      "id": 1764101209162,
       "nombre": "Maria Lopez",
       "email": "maria@example.com",
       "telefono": "987654321",
       "fecha": "2023-02-20",
       "pedidos": 2,
-      "comprado": 520000,
-      "id": 1764101209162
+      "comprado": 520000
     },
     {
+      "id": 1764101209171,
       "nombre": "Carlos Ruiz",
       "email": "carlos@example.com",
       "telefono": "555666777",
       "fecha": "2023-03-10",
       "pedidos": 8,
-      "comprado": 10000000,
-      "id": 1764101209171
+      "comprado": 10000000
     },
+
     {
       "id": 1764103872779,
       "nombre": "Juan Pérez",
       "email": "juan.pérez@email.com",
-      "telefono": "555-2000",
+      "telefono": "5552000",
       "fecha": "2025-10-13",
       "pedidos": 9,
       "comprado": 3802305
@@ -40,7 +41,7 @@
       "id": 1764103872807,
       "nombre": "María González",
       "email": "maría.gonzález@email.com",
-      "telefono": "555-2001",
+      "telefono": "5552001",
       "fecha": "2025-09-15",
       "pedidos": 8,
       "comprado": 1097378
@@ -49,7 +50,7 @@
       "id": 1764103872825,
       "nombre": "Carlos Rodríguez",
       "email": "carlos.rodríguez@email.com",
-      "telefono": "555-2002",
+      "telefono": "5552002",
       "fecha": "2025-11-24",
       "pedidos": 15,
       "comprado": 1150000
@@ -58,7 +59,7 @@
       "id": 1764103872831,
       "nombre": "Ana Martínez",
       "email": "ana.martínez@email.com",
-      "telefono": "555-2003",
+      "telefono": "5552003",
       "fecha": "2025-11-13",
       "pedidos": 14,
       "comprado": 3011354
@@ -67,7 +68,7 @@
       "id": 1764103872840,
       "nombre": "Luis Fernández",
       "email": "luis.fernández@email.com",
-      "telefono": "555-2004",
+      "telefono": "5552004",
       "fecha": "2025-10-21",
       "pedidos": 4,
       "comprado": 5415987
@@ -76,7 +77,7 @@
       "id": 1764103872846,
       "nombre": "Carmen López",
       "email": "carmen.lópez@email.com",
-      "telefono": "555-2005",
+      "telefono": "5552005",
       "fecha": "2025-11-14",
       "pedidos": 11,
       "comprado": 11910000
@@ -85,7 +86,7 @@
       "id": 1764103872851,
       "nombre": "José Sánchez",
       "email": "josé.sánchez@email.com",
-      "telefono": "555-2006",
+      "telefono": "5552006",
       "fecha": "2025-09-17",
       "pedidos": 2,
       "comprado": 5198629
@@ -94,7 +95,7 @@
       "id": 1764103872857,
       "nombre": "Laura Ramírez",
       "email": "laura.ramírez@email.com",
-      "telefono": "555-2007",
+      "telefono": "5552007",
       "fecha": "2025-10-25",
       "pedidos": 7,
       "comprado": 41150000
@@ -103,7 +104,7 @@
       "id": 1764103872863,
       "nombre": "Miguel Torres",
       "email": "miguel.torres@email.com",
-      "telefono": "555-2008",
+      "telefono": "5552008",
       "fecha": "2025-09-16",
       "pedidos": 7,
       "comprado": 10840000
@@ -112,7 +113,7 @@
       "id": 1764103872869,
       "nombre": "Isabel Flores",
       "email": "isabel.flores@email.com",
-      "telefono": "555-2009",
+      "telefono": "5552009",
       "fecha": "2025-10-24",
       "pedidos": 13,
       "comprado": 2434085
@@ -121,7 +122,7 @@
       "id": 1764103872875,
       "nombre": "TechCorp S.A.",
       "email": "techcorp.s.a.@email.com",
-      "telefono": "555-2010",
+      "telefono": "5552010",
       "fecha": "2025-09-01",
       "pedidos": 8,
       "comprado": 2557052
@@ -130,7 +131,7 @@
       "id": 1764103872881,
       "nombre": "Innovatech Ltda",
       "email": "innovatech.ltda@email.com",
-      "telefono": "555-2011",
+      "telefono": "5552011",
       "fecha": "2025-11-13",
       "pedidos": 14,
       "comprado": 29800000
@@ -139,7 +140,7 @@
       "id": 1764103872887,
       "nombre": "Digital Solutions",
       "email": "digital.solutions@email.com",
-      "telefono": "555-2012",
+      "telefono": "5552012",
       "fecha": "2025-11-25",
       "pedidos": 10,
       "comprado": 6960000
@@ -148,7 +149,7 @@
       "id": 1764103872893,
       "nombre": "Smart Business",
       "email": "smart.business@email.com",
-      "telefono": "555-2013",
+      "telefono": "5552013",
       "fecha": "2025-09-23",
       "pedidos": 6,
       "comprado": 679685
@@ -157,7 +158,7 @@
       "id": 1764103872900,
       "nombre": "Future Tech",
       "email": "future.tech@email.com",
-      "telefono": "555-2014",
+      "telefono": "5552014",
       "fecha": "2025-11-19",
       "pedidos": 2,
       "comprado": 11400000
@@ -166,7 +167,7 @@
       "id": 1764103872905,
       "nombre": "Pedro Morales",
       "email": "pedro.morales@email.com",
-      "telefono": "555-2015",
+      "telefono": "5552015",
       "fecha": "2025-10-01",
       "pedidos": 6,
       "comprado": 29305000
@@ -175,7 +176,7 @@
       "id": 1764103872911,
       "nombre": "Sofía Castro",
       "email": "sofía.castro@email.com",
-      "telefono": "555-2016",
+      "telefono": "5552016",
       "fecha": "2025-11-20",
       "pedidos": 5,
       "comprado": 3202200
@@ -184,7 +185,7 @@
       "id": 1764103872917,
       "nombre": "Diego Vargas",
       "email": "diego.vargas@email.com",
-      "telefono": "555-2017",
+      "telefono": "5552017",
       "fecha": "2025-11-12",
       "pedidos": 5,
       "comprado": 1912140
@@ -193,7 +194,7 @@
       "id": 1764103872923,
       "nombre": "Valentina Ruiz",
       "email": "valentina.ruiz@email.com",
-      "telefono": "555-2018",
+      "telefono": "5552018",
       "fecha": "2025-09-19",
       "pedidos": 13,
       "comprado": 4285235
@@ -202,7 +203,7 @@
       "id": 1764103872929,
       "nombre": "Andrés Mendoza",
       "email": "andrés.mendoza@email.com",
-      "telefono": "555-2019",
+      "telefono": "5552019",
       "fecha": "2025-10-09",
       "pedidos": 9,
       "comprado": 1235652

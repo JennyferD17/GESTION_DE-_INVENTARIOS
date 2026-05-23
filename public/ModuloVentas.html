@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de Inventarios - Ventas</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/pagination.css" />
+<link rel="stylesheet" href="assets/css/pagination.css" />
 </head>
 <body>
   <div class="layout">
@@ -60,23 +60,17 @@
 
             <hr style="margin: 15px 0; border: 1px solid #ddd;">
             
-            <!-- SECCIÓN CORREGIDA: Añadir artículos al carrito de venta -->
-            <h4 style="margin-bottom: 10px; color: #555;">Añadir artículos a la venta</h4>
-            <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 15px;">
+            <h4 style="margin-bottom: 10px;">Agregar Productos</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px;">
               <div>
-                <label for="idProducto">Seleccione Producto:</label>
-                <!-- Cambiado de input de texto a select para carga dinámica desde el JS -->
-                <select id="idProducto" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 40px;" required>
-                  <option value="">-- Seleccione un producto --</option>
-                </select>
+                <label for="idProducto">ID Producto:</label>
+                <input type="text" id="idProducto" placeholder="Ingrese ID" />
               </div>
               <div>
                 <label for="cantidadProducto">Cantidad:</label>
-                <input type="number" id="cantidadProducto" value="1" min="1" style="height: 40px; padding: 8px; width: 100%; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" />
+                <input type="number" id="cantidadProducto" value="1" min="1" />
               </div>
-              <button type="button" id="btnAgregarProducto" class="nuevo-btn" style="margin: 0; height: 40px; background-color: #28a745;">
-                🛒 Añadir al carrito
-              </button>
+              <button type="button" id="btnAgregarProducto" class="nuevo-btn" style="margin: 0; height: 40px;">+ Agregar</button>
             </div>
 
             <!-- Tabla de productos agregados -->
@@ -176,6 +170,6 @@
   <script src="assets/js/ui.js"></script>
   <script src="assets/js/backend-check.js"></script>
   <script src="assets/js/pagination.js"></script>
-  <script src="assets/js/ModuloVentas.js"></script>
+<script src="assets/js/ModuloVentas.js"></script>
 </body>
 </html>

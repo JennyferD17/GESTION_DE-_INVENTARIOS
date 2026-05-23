@@ -36,12 +36,12 @@ document.addEventListener('DOMContentLoaded', function () {
     tr.innerHTML = `
      <td>${cliente.tipoDocumento}</td>
       <td>${cliente.idCliente}</td>
-      <td>${cliente.numeroDocumento}</td>
       <td>${cliente.nombre}</td>
       <td>${cliente.email}</td>
       <td>${cliente.telefono}</td>
       <td>${cliente.fecha}</td>
       <td>${cliente.pedidos || 0}</td>
+      <td>${cliente.comprado}</td>
       <td>$${parseFloat(cliente.comprado || 0).toLocaleString('es-CO')}</td>
       <td>
         <button class="btn-edit">✏️</button>

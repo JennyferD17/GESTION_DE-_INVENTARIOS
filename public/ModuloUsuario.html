@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+    Gestión Usuarios
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="assets/css/style.css"
+  >
+
+</head>
+
+<body>
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <nav class="sidebar-menu">
+
+        <ul>
+
+          <li>
+            <a href="Dashboard.html">
+              Dashboard
+            </a>
+          </li>
+
+          <li>
+            <a href="ModuloProductos.html">
+              Productos
+            </a>
+          </li>
+
+          <li>
+            <a href="ModuloUsuarios.html"
+               class="active">
+              Usuarios
+            </a>
+          </li>
+
+          <li>
+            <a href="Login.html">
+              Cerrar sesión
+            </a>
+          </li>
+
+        </ul>
+
+      </nav>
+
+    </aside>
+
+    <!-- CONTENIDO -->
+
+    <main class="dashboard-container">
+
+      <div class="topbar">
+
+        <h1 class="topbar-title">
+          GESTIÓN DE USUARIOS
+        </h1>
+
+      </div>
+
+      <!-- HEADER -->
+
+      <div class="productos-header">
+
+        <h2>
+          Usuarios
+        </h2>
+
+        <button
+          id="btnNuevoUsuario"
+          class="nuevo-btn"
+        >
+
+          NUEVO USUARIO +
+
+        </button>
+
+      </div>
+
+      <!-- FORMULARIO -->
+
+      <div
+        id="formularioUsuario"
+        class="formulario-container"
+        style="display:none;"
+      >
+
+        <h3>
+          Registrar usuario
+        </h3>
+
+        <form id="formUsuario">
+
+          <label>
+            Nombre
+          </label>
+
+          <input
+            type="text"
+            id="nombreUsuario"
+            required
+          >
+
+          <label>
+            Documento
+          </label>
+
+          <input
+            type="text"
+            id="documentoUsuario"
+            required
+          >
+
+          <label>
+            Correo
+          </label>
+
+          <input
+            type="email"
+            id="correoUsuario"
+            required
+          >
+
+          <label>
+            Teléfono
+          </label>
+
+          <input
+            type="text"
+            id="telefonoUsuario"
+            required
+          >
+
+          <label>
+            Contraseña
+          </label>
+
+          <input
+            type="password"
+            id="passwordUsuario"
+            required
+          >
+
+          <label>
+            Rol
+          </label>
+
+          <select id="rolUsuario">
+
+            <option value="usuario">
+              Usuario
+            </option>
+
+            <option value="admin">
+              Administrador
+            </option>
+
+          </select>
+
+          <button type="submit">
+            Guardar
+          </button>
+
+          <button
+            type="button"
+            id="cancelarUsuario"
+          >
+
+            Cancelar
+
+          </button>
+
+        </form>
+
+      </div>
+
+      <!-- TABLA -->
+
+      <table id="tablaUsuarios">
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody></tbody>
+
+      </table>
+
+    </main>
+
+  </div>
+
+  <script src="assets/js/ModuloUsuarios.js"></script>
+
+</body>
+
+</html>

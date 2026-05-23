@@ -236,80 +236,174 @@
             />
 
             <!-- ================================= -->
-            <!-- PROVEEDOR -->
-            <!-- ================================= -->
+<!-- PROVEEDOR -->
+<!-- ================================= -->
 
-            <label for="proveedorProducto">
-              Proveedor:
-            </label>
+<label for="proveedorProducto">
+  Proveedor:
+</label>
 
-            <div
-              style="
-                display:flex;
-                gap:10px;
-                align-items:center;
-              "
-            >
+<div
+  style="
+    display:flex;
+    gap:10px;
+    align-items:center;
+  "
+>
 
-              <select
-                id="proveedorProducto"
-                required
-              >
+  <select
+    id="proveedorProducto"
+    required
+    style="
+      flex:1;
+      padding:10px;
+    "
+  >
 
-                <option value="">
-                  Seleccione proveedor
-                </option>
+    <option value="">
+      Seleccione proveedor
+    </option>
 
-              </select>
+  </select>
 
-              <button
-                type="button"
-                id="btnNuevoProveedorRapido"
-              >
-                + Nuevo
-              </button>
+  <button
+    type="button"
+    id="btnNuevoProveedorRapido"
+    style="
+      padding:10px 15px;
+      background:#2563eb;
+      color:white;
+      border:none;
+      border-radius:5px;
+      cursor:pointer;
+    "
+  >
+    + Nuevo
+  </button>
 
-            </div>
+</div>
 
-            <!-- ================================= -->
-            <!-- MODAL NUEVO PROVEEDOR -->
-            <!-- ================================= -->
+<!-- ================================= -->
+<!-- MODAL NUEVO PROVEEDOR -->
+<!-- ================================= -->
 
-            <div
-              id="modalProveedorRapido"
-              style="
-                display:none;
-                background:#fff;
-                border:1px solid #ccc;
-                padding:20px;
-                margin-top:15px;
-                border-radius:10px;
-              "
-            >
+<div
+  id="modalProveedorRapido"
+  style="
+    display:none;
+    background:#f8f9fa;
+    border:1px solid #ccc;
+    padding:20px;
+    margin-top:15px;
+    border-radius:10px;
+  "
+>
 
-              <h3>
-                Crear nuevo proveedor
-              </h3>
+  <h3>
+    Registrar nuevo proveedor
+  </h3>
 
-              <input
-                type="text"
-                id="nuevoProveedorNombre"
-                placeholder="Nombre proveedor"
-                style="
-                  width:100%;
-                  padding:10px;
-                  margin-bottom:10px;
-                "
-              />
+  <!-- NOMBRE -->
+  <input
+    type="text"
+    id="nuevoProveedorNombre"
+    placeholder="Nombre proveedor"
+    style="
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+    "
+  />
 
-              <button
-                type="button"
-                id="guardarProveedorRapido"
-              >
-                Guardar proveedor
-              </button>
+  <!-- CONTACTO -->
+  <input
+    type="text"
+    id="nuevoProveedorContacto"
+    placeholder="Nombre contacto"
+    style="
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+    "
+  />
 
-            </div>
+  <!-- CORREO -->
+  <input
+    type="email"
+    id="nuevoProveedorCorreo"
+    placeholder="Correo"
+    style="
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+    "
+  />
+
+  <!-- TELÉFONO -->
+  <input
+    type="text"
+    id="nuevoProveedorTelefono"
+    placeholder="Teléfono"
+    style="
+      width:100%;
+      padding:10px;
+      margin-bottom:10px;
+    "
+  />
+
+  <!-- DIRECCIÓN -->
+  <input
+    type="text"
+    id="nuevoProveedorDireccion"
+    placeholder="Dirección"
+    style="
+      width:100%;
+      padding:10px;
+      margin-bottom:15px;
+    "
+  />
+
+  <!-- BOTONES -->
+  <div
+    style="
+      display:flex;
+      gap:10px;
+    "
+  >
+
+    <button
+      type="button"
+      id="guardarProveedorRapido"
+      style="
+        padding:10px 15px;
+        background:#16a34a;
+        color:white;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+      "
+    >
+      Guardar proveedor
+    </button>
+
+    <button
+      type="button"
+      id="cerrarModalProveedor"
+      style="
+        padding:10px 15px;
+        background:#dc2626;
+        color:white;
+        border:none;
+        border-radius:5px;
+        cursor:pointer;
+      "
+    >
+      Cancelar
+    </button>
+
+  </div>
+
+</div>
 
             <!-- ESTADO -->
 

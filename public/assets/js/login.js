@@ -2,7 +2,9 @@
 // LOGIN
 // ============================================
 
-document.addEventListener(  'DOMContentLoaded',  function () {
+document.addEventListener(
+  'DOMContentLoaded',
+  function () {
 
     const loginBtn =
       document.getElementById(
@@ -23,7 +25,9 @@ document.addEventListener(  'DOMContentLoaded',  function () {
     // LOGIN
     // =====================================
 
-    loginBtn.addEventListener(      'click',      async function () {
+    loginBtn.addEventListener(
+      'click',
+      async function () {
 
         const email =
           document.getElementById(
@@ -40,6 +44,10 @@ document.addEventListener(  'DOMContentLoaded',  function () {
         // =========================
 
         if (!email || !password) {
+
+          mensaje.style.color =
+            'red';
+
           mensaje.innerHTML =
             'Complete todos los campos';
 
@@ -74,7 +82,7 @@ document.addEventListener(  'DOMContentLoaded',  function () {
           console.log(data);
 
           // =====================
-          // LOGIN OK
+          // LOGIN EXITOSO
           // =====================
 
           if (data.success) {
@@ -84,8 +92,15 @@ document.addEventListener(  'DOMContentLoaded',  function () {
             // =================
 
             localStorage.setItem(
+              'loggedIn',
+              'true'
+            );
+
+            localStorage.setItem(
               'usuario',
-              JSON.stringify(data.user)
+              JSON.stringify(
+                data.user
+              )
             );
 
             mensaje.style.color =
@@ -111,7 +126,8 @@ document.addEventListener(  'DOMContentLoaded',  function () {
               'red';
 
             mensaje.innerHTML =
-              data.message;
+              data.message ||
+              'Credenciales incorrectas';
           }
 
         } catch (error) {
@@ -151,9 +167,9 @@ document.addEventListener(  'DOMContentLoaded',  function () {
               '/api/reset-password',
               {
 
-                method:'POST',
+                method: 'POST',
 
-                headers:{
+                headers: {
                   'Content-Type':
                     'application/json'
                 },

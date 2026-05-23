@@ -1,41 +1,22 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
 
   // ============================================
   // ELEMENTOS
   // ============================================
 
-  const btnNuevo =
-    document.getElementById('btnNuevoProducto');
+  const btnNuevo = document.getElementById('btnNuevoProducto');
+  const formulario = document.getElementById('formularioProducto');
+  const cancelar = document.getElementById('cancelarProducto');
+  const tablaBody = document.querySelector('#tablaProductos tbody');
+  const formProducto = document.getElementById('formProducto');
+  const filtroInput = document.getElementById('filtroProductos');
 
-  const formulario =
-    document.getElementById('formularioProducto');
-
-  const cancelar =
-    document.getElementById('cancelarProducto');
-
-  const tablaBody =
-    document.querySelector('#tablaProductos tbody');
-
-  const formProducto =
-    document.getElementById('formProducto');
-
-  const filtroInput =
-    document.getElementById('filtroProductos');
-
-  const btnNuevoProveedorRapido =
-    document.getElementById(
-      'btnNuevoProveedorRapido'
-    );
-
-  const modalProveedorRapido =
-    document.getElementById(
-      'modalProveedorRapido'
-    );
-
-  const guardarProveedorRapido =
-    document.getElementById(
-      'guardarProveedorRapido'
-    );
+  // PROVEEDORES
+  const selectProveedor = document.getElementById('proveedorProducto');
+  const btnNuevoProveedor = document.getElementById('btnNuevoProveedorRapido');
+  const modalProveedor = document.getElementById('modalProveedorRapido');
+  const guardarProveedor = document.getElementById('guardarProveedorRapido');
+  const cerrarModalProveedor = document.getElementById('cerrarModalProveedor');
 
   // ============================================
   // VARIABLES
@@ -46,13 +27,12 @@ document.addEventListener('DOMContentLoaded', function () {
   let allProducts = [];
 
   // ============================================
-  // CREAR FILA
+  // CREAR FILA TABLA
   // ============================================
 
   function createRow(product) {
 
-    const tr =
-      document.createElement('tr');
+    const tr = document.createElement('tr');
 
     tr.dataset.id = product.id;
 
@@ -61,30 +41,14 @@ document.addEventListener('DOMContentLoaded', function () {
       <td>${product.nombre}</td>
       <td>${product.categoria}</td>
       <td>${product.marca}</td>
-      <td>$${parseFloat(product.precio)
-        .toLocaleString('es-CO')}</td>
+      <td>$${parseFloat(product.precio).toLocaleString('es-CO')}</td>
       <td>${product.stock}</td>
       <td>${product.proveedor}</td>
       <td>${product.estado}</td>
 
       <td>
-
-        <button
-          class="btn-edit"
-          title="Editar">
-
-          ✏️
-
-        </button>
-
-        <button
-          class="btn-delete"
-          title="Eliminar">
-
-          🗑️
-
-        </button>
-
+        <button class="btn-edit">✏️</button>
+        <button class="btn-delete">🗑️</button>
       </td>
     `;
 
@@ -123,11 +87,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
 
-      const res =
-        await fetch('/api/productos');
-
-      const products =
-        await res.json();
+      const res = await fetch('/api/productos');
+      const products = await res.json();
 
       allProducts = products;
 
@@ -141,9 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       } else {
 
-        paginationInstance.updateItems(
-          products
-        );
+        paginationInstance.updateItems(products);
       }
 
       renderCurrentPage();
@@ -151,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (error) {
 
       console.error(
-        'Error productos:',
+        'Error cargando productos:',
         error
       );
     }
@@ -171,12 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const proveedores =
         await res.json();
 
-      const select =
-        document.getElementById(
-          'proveedorProducto'
-        );
-
-      select.innerHTML =
+      selectProveedor.innerHTML =
         '<option value="">Seleccione proveedor</option>';
 
       proveedores.forEach(proveedor => {
@@ -190,93 +144,72 @@ document.addEventListener('DOMContentLoaded', function () {
         option.textContent =
           proveedor.nombre;
 
-        select.appendChild(option);
+        selectProveedor.appendChild(option);
       });
 
     } catch (error) {
 
       console.error(
-        'Error proveedores:',
+        'Error cargando proveedores:',
         error
       );
     }
   }
 
   // ============================================
-  // CARGA INICIAL
-  // ============================================
-
-  loadProducts();
-  cargarProveedores();
-
-  // ============================================
-  // FILTRO
-  // ============================================
-
-  if (filtroInput) {
-
-    filtroInput.addEventListener(
-      'input',
-      function () {
-
-        const search =
-          this.value.toLowerCase();
-
-        const filtered =
-          allProducts.filter(product => {
-
-            const text = `
-              ${product.nombre}
-              ${product.categoria}
-              ${product.marca}
-              ${product.proveedor}
-            `.toLowerCase();
-
-            return text.includes(search);
-          });
-
-        paginationInstance.updateItems(
-          search ? filtered : allProducts
-        );
-
-        renderCurrentPage();
-      }
-    );
-  }
-
-  // ============================================
   // NUEVO PRODUCTO
   // ============================================
 
-  btnNuevo.addEventListener(
-    'click',
-    function () {
+  btnNuevo.addEventListener('click', () => {
 
-      editingId = null;
+    editingId = null;
 
-      formProducto.reset();
+    formProducto.reset();
 
-      formulario.style.display =
-        'block';
-    }
-  );
+    formulario.style.display = 'block';
+  });
 
   // ============================================
   // CANCELAR
   // ============================================
 
-  cancelar.addEventListener(
-    'click',
-    function () {
+  cancelar.addEventListener('click', () => {
 
-      formulario.style.display =
-        'none';
+    formulario.style.display = 'none';
 
-      formProducto.reset();
+    formProducto.reset();
 
-      editingId = null;
-    }
-  );
+    editingId = null;
+  });
+
+  // ============================================
+  // FILTRAR PRODUCTOS
+  // ============================================
+
+  filtroInput.addEventListener('input', function () {
+
+    const search =
+      this.value.toLowerCase();
+
+    const filtered =
+      allProducts.filter(product => {
+
+        const text = `
+          ${product.nombre}
+          ${product.categoria}
+          ${product.marca}
+          ${product.proveedor}
+        `.toLowerCase();
+
+        return text.includes(search);
+      });
+
+    paginationInstance.updateItems(
+      search ? filtered : allProducts
+    );
+
+    renderCurrentPage();
+  });
 
   // ============================================
   // GUARDAR PRODUCTO
@@ -290,47 +223,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const producto = {
 
-        id:
-          editingId || Date.now(),
+        id: editingId || Date.now(),
 
         nombre:
-          document.getElementById(
-            'nombreProducto'
-          ).value.trim(),
+          document.getElementById('nombreProducto')
+          .value.trim(),
 
         categoria:
-          document.getElementById(
-            'categoriaProducto'
-          ).value.trim(),
+          document.getElementById('categoriaProducto')
+          .value.trim(),
 
         marca:
-          document.getElementById(
-            'marcaProducto'
-          ).value.trim(),
+          document.getElementById('marcaProducto')
+          .value.trim(),
 
         precio:
           parseFloat(
-            document.getElementById(
-              'precioProducto'
-            ).value
+            document.getElementById('precioProducto')
+            .value
           ) || 0,
 
         stock:
           parseInt(
-            document.getElementById(
-              'stockProducto'
-            ).value
+            document.getElementById('stockProducto')
+            .value
           ) || 0,
 
         proveedor:
-          document.getElementById(
-            'proveedorProducto'
-          ).value.trim(),
+          selectProveedor.value.trim(),
 
         estado:
-          document.getElementById(
-            'estadoProducto'
-          ).value
+          document.getElementById('estadoProducto')
+          .value
       };
 
       try {
@@ -341,12 +265,10 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
 
             headers: {
-              'Content-Type':
-                'application/json'
+              'Content-Type': 'application/json'
             },
 
-            body:
-              JSON.stringify(producto)
+            body: JSON.stringify(producto)
           });
 
         const data =
@@ -356,10 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.success) {
 
-          if (
-            window.ui &&
-            ui.showToast
-          ) {
+          if (window.ui && ui.showToast) {
 
             ui.showToast(
               'Producto guardado',
@@ -369,10 +288,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
           await loadProducts();
 
+          formProducto.reset();
+
           formulario.style.display =
             'none';
-
-          formProducto.reset();
 
           editingId = null;
 
@@ -384,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function () {
       } catch (error) {
 
         console.error(
-          'Error guardando:',
+          'Error guardando producto:',
           error
         );
       }
@@ -395,207 +314,219 @@ document.addEventListener('DOMContentLoaded', function () {
   // EDITAR / ELIMINAR
   // ============================================
 
-  tablaBody.addEventListener(
-    'click',
-    function (e) {
+  tablaBody.addEventListener('click', function (e) {
 
-      const btn =
-        e.target.closest('button');
+    const btn =
+      e.target.closest('button');
 
-      if (!btn) return;
+    if (!btn) return;
 
-      const row =
-        btn.closest('tr');
+    const row =
+      btn.closest('tr');
 
-      const id =
-        parseInt(row.dataset.id);
+    const id =
+      parseInt(row.dataset.id);
 
-      // ========================================
-      // EDITAR
-      // ========================================
+    // ========================================
+    // EDITAR
+    // ========================================
 
-      if (
-        btn.classList.contains(
-          'btn-edit'
-        )
-      ) {
+    if (btn.classList.contains('btn-edit')) {
 
-        const cells =
-          row.querySelectorAll('td');
+      const cells =
+        row.querySelectorAll('td');
 
-        document.getElementById(
-          'nombreProducto'
-        ).value =
-          cells[1].textContent;
+      document.getElementById('nombreProducto').value =
+        cells[1].textContent;
 
-        document.getElementById(
-          'categoriaProducto'
-        ).value =
-          cells[2].textContent;
+      document.getElementById('categoriaProducto').value =
+        cells[2].textContent;
 
-        document.getElementById(
-          'marcaProducto'
-        ).value =
-          cells[3].textContent;
+      document.getElementById('marcaProducto').value =
+        cells[3].textContent;
 
-        document.getElementById(
-          'precioProducto'
-        ).value =
-          cells[4]
-            .textContent
-            .replace('$', '')
-            .replace(/\./g, '');
+      document.getElementById('precioProducto').value =
+        cells[4]
+          .textContent
+          .replace('$', '')
+          .replace(/\./g, '');
 
-        document.getElementById(
-          'stockProducto'
-        ).value =
-          cells[5].textContent;
+      document.getElementById('stockProducto').value =
+        cells[5].textContent;
 
-        document.getElementById(
-          'proveedorProducto'
-        ).value =
-          cells[6].textContent;
+      selectProveedor.value =
+        cells[6].textContent;
 
-        document.getElementById(
-          'estadoProducto'
-        ).value =
-          cells[7].textContent;
+      document.getElementById('estadoProducto').value =
+        cells[7].textContent;
 
-        editingId = id;
+      editingId = id;
 
-        formulario.style.display =
-          'block';
-      }
-
-      // ========================================
-      // ELIMINAR
-      // ========================================
-
-      if (
-        btn.classList.contains(
-          'btn-delete'
-        )
-      ) {
-
-        alert(
-          'Eliminar pendiente backend'
-        );
-      }
+      formulario.style.display = 'block';
     }
-  );
+
+    // ========================================
+    // ELIMINAR
+    // ========================================
+
+    if (btn.classList.contains('btn-delete')) {
+
+      alert(
+        'Eliminar pendiente backend'
+      );
+    }
+  });
 
   // ============================================
   // ABRIR MODAL PROVEEDOR
   // ============================================
 
-  if (btnNuevoProveedorRapido) {
+  btnNuevoProveedor.addEventListener(
+    'click',
+    () => {
 
-    btnNuevoProveedorRapido
-      .addEventListener(
-        'click',
-        function () {
+      modalProveedor.style.display =
+        'block';
+    }
+  );
 
-          modalProveedorRapido
-            .style.display =
-              'block';
-        }
-      );
+  // ============================================
+  // CERRAR MODAL
+  // ============================================
+
+  if (cerrarModalProveedor) {
+
+    cerrarModalProveedor.addEventListener(
+      'click',
+      () => {
+
+        modalProveedor.style.display =
+          'none';
+      }
+    );
   }
 
   // ============================================
   // GUARDAR PROVEEDOR
   // ============================================
 
-  if (guardarProveedorRapido) {
+  guardarProveedor.addEventListener(
+    'click',
+    async () => {
 
-    guardarProveedorRapido
-      .addEventListener(
-        'click',
-        async function () {
+      const nombre =
+        document.getElementById(
+          'nuevoProveedorNombre'
+        ).value.trim();
 
-          const nombre =
-            document.getElementById(
-              'nuevoProveedorNombre'
-            ).value.trim();
+      const contacto =
+        document.getElementById(
+          'nuevoProveedorContacto'
+        ).value.trim();
 
-          if (!nombre) {
+      const correo =
+        document.getElementById(
+          'nuevoProveedorCorreo'
+        ).value.trim();
 
-            alert(
-              'Ingrese proveedor'
-            );
+      const telefono =
+        document.getElementById(
+          'nuevoProveedorTelefono'
+        ).value.trim();
 
-            return;
-          }
+      const direccion =
+        document.getElementById(
+          'nuevoProveedorDireccion'
+        ).value.trim();
 
-          try {
+      if (!nombre) {
 
-            const res =
-              await fetch(
-                '/api/proveedores',
-                {
+        alert(
+          'Ingrese nombre proveedor'
+        );
 
-                  method: 'POST',
+        return;
+      }
 
-                  headers: {
-                    'Content-Type':
-                      'application/json'
-                  },
+      try {
 
-                  body: JSON.stringify({
+        const res =
+          await fetch('/api/proveedores', {
 
-                    nombre,
+            method: 'POST',
 
-                    contacto: '',
+            headers: {
+              'Content-Type':
+                'application/json'
+            },
 
-                    correo: '',
+            body: JSON.stringify({
 
-                    telefono: '',
+              nombre,
+              contacto,
+              correo,
+              telefono,
+              direccion
+            })
+          });
 
-                    direccion: ''
-                  })
-                }
-              );
+        const data =
+          await res.json();
 
-            const data =
-              await res.json();
+        if (data.success) {
 
-            if (data.success) {
+          await cargarProveedores();
 
-              await cargarProveedores();
+          selectProveedor.value =
+            nombre;
 
-              document.getElementById(
-                'proveedorProducto'
-              ).value = nombre;
+          modalProveedor.style.display =
+            'none';
 
-              document.getElementById(
-                'nuevoProveedorNombre'
-              ).value = '';
+          document.getElementById(
+            'nuevoProveedorNombre'
+          ).value = '';
 
-              modalProveedorRapido
-                .style.display =
-                  'none';
+          document.getElementById(
+            'nuevoProveedorContacto'
+          ).value = '';
 
-              if (
-                window.ui &&
-                ui.showToast
-              ) {
+          document.getElementById(
+            'nuevoProveedorCorreo'
+          ).value = '';
 
-                ui.showToast(
-                  'Proveedor creado',
-                  'success'
-                );
-              }
-            }
+          document.getElementById(
+            'nuevoProveedorTelefono'
+          ).value = '';
 
-          } catch (error) {
+          document.getElementById(
+            'nuevoProveedorDireccion'
+          ).value = '';
 
-            console.error(
-              'Error proveedor:',
-              error
+          if (window.ui && ui.showToast) {
+
+            ui.showToast(
+              'Proveedor creado',
+              'success'
             );
           }
         }
-      );
-  }
+
+      } catch (error) {
+
+        console.error(
+          'Error proveedor:',
+          error
+        );
+      }
+    }
+  );
+
+  // ============================================
+  // INICIALIZAR
+  // ============================================
+
+  loadProducts();
+  cargarProveedores();
 
 });

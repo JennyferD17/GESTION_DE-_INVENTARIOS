@@ -196,6 +196,30 @@ document.addEventListener('DOMContentLoaded', function () {
    */
   const idClienteInput = document.getElementById('idCliente');
   const clienteVentaInput = document.getElementById('clienteVenta');
+  const telefonoClienteInput =
+  document.getElementById(
+    'telefonoCliente'
+  );
+
+const emailClienteInput =
+  document.getElementById(
+    'emailCliente'
+  );
+
+const btnNuevoCliente =
+  document.getElementById(
+    'btnNuevoCliente'
+  );
+
+const nuevoClienteBox =
+  document.getElementById(
+    'nuevoClienteBox'
+  );
+
+const guardarNuevoCliente =
+  document.getElementById(
+    'guardarNuevoCliente'
+  );
   if (idClienteInput) {
     idClienteInput.addEventListener('keydown', async function (e) {
       if (e.key === 'Tab') {
@@ -203,8 +227,51 @@ document.addEventListener('DOMContentLoaded', function () {
         const id = this.value.trim();
         if (!id) return;
         const cliente = clientes.find(c => c.id == id);
-        if (cliente) {
-          clienteVentaInput.value = cliente.nombre;
+       if (cliente) {
+
+  clienteVentaInput.value =
+    cliente.nombre;
+
+  telefonoClienteInput.value =
+    cliente.telefono || '';
+
+  emailClienteInput.value =
+    cliente.email || '';
+
+  nuevoClienteBox.style.display =
+    'none';
+
+  if (
+    window.ui &&
+    ui.showToast
+  ) {
+
+    ui.showToast(
+      'Cliente encontrado',
+      'success'
+    );
+  }
+
+} else {
+
+  clienteVentaInput.value = '';
+  telefonoClienteInput.value = '';
+  emailClienteInput.value = '';
+
+  nuevoClienteBox.style.display =
+    'block';
+
+  if (
+    window.ui &&
+    ui.showToast
+  ) {
+
+    ui.showToast(
+      'Cliente no encontrado',
+      'warning'
+    );
+  }
+}
           if (window.ui && ui.showToast) ui.showToast('Cliente encontrado', 'success');
         } else {
           clienteVentaInput.value = '';
@@ -302,9 +369,148 @@ document.addEventListener('DOMContentLoaded', function () {
     actualizarTablaProductos();
   });
 
+
+
+  // =====================================
+// MOSTRAR NUEVO CLIENTE
+// =====================================
+
+btnNuevoCliente.addEventListener(
+  'click',
+  function () {
+
+    nuevoClienteBox.style.display =
+      'block';
+  }
+);
+
+// =====================================
+// GUARDAR NUEVO CLIENTE
+// =====================================
+
+guardarNuevoCliente.addEventListener(
+  'click',
+  async function () {
+
+    const nombre =
+      document.getElementById(
+        'nuevoNombre'
+      ).value.trim();
+
+    const email =
+      document.getElementById(
+        'nuevoEmail'
+      ).value.trim();
+
+    const telefono =
+      document.getElementById(
+        'nuevoTelefono'
+      ).value.trim();
+
+    if (
+      !nombre ||
+      !email
+    ) {
+
+      alert(
+        'Complete datos cliente'
+      );
+
+      return;
+    }
+
+    const nuevoCliente = {
+
+      id: Date.now(),
+
+      nombre,
+
+      email,
+
+      telefono,
+
+      fecha:
+        new Date()
+        .toISOString()
+        .split('T')[0],
+
+      pedidos: 0,
+
+      comprado: 0
+    };
+
+    try {
+
+      const res =
+        await fetch(
+          '/api/clientes',
+          {
+
+            method:'POST',
+
+            headers:{
+              'Content-Type':
+                'application/json'
+            },
+
+            body: JSON.stringify(
+              nuevoCliente
+            )
+          }
+        );
+
+      const data =
+        await res.json();
+
+      if (data.success) {
+
+        clientes.push(
+          nuevoCliente
+        );
+
+        document.getElementById(
+          'idCliente'
+        ).value =
+          nuevoCliente.id;
+
+        clienteVentaInput.value =
+          nombre;
+
+        telefonoClienteInput.value =
+          telefono;
+
+        emailClienteInput.value =
+          email;
+
+        nuevoClienteBox.style.display =
+          'none';
+
+        alert(
+          'Cliente registrado'
+        );
+
+      } else {
+
+        alert(
+          data.message
+        );
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        'Error guardando cliente'
+      );
+    }
+  }
+);
   /**
    * Guardar venta (crear o actualizar).
    */
+
+  
   formVenta.addEventListener('submit', async function (e) {
     e.preventDefault();
     console.debug('ModuloVentas: submit detectado');

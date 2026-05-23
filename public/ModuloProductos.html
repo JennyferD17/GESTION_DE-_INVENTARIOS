@@ -1,112 +1,437 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestión de Inventarios - Productos</title>
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/pagination.css" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Gestión de Inventarios - Productos
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="assets/css/style.css"
+  />
+
+  <link
+    rel="stylesheet"
+    href="assets/css/pagination.css"
+  />
+
 </head>
+
 <body>
+
   <div class="layout">
-    <!-- Barra lateral -->
+
+    <!-- ===================================== -->
+    <!-- SIDEBAR -->
+    <!-- ===================================== -->
+
     <aside class="sidebar">
+
       <nav class="sidebar-menu">
+
         <ul>
-          <li><a href="Dashboard.html" id="dashboardBtn">Dashboard</a></li>
-          <li><a href="ModuloProductos.html" id="productosBtn" class="active">Productos</a></li>
-          <li><a href="ModuloVentas.html" id="ventasBtn">Ventas</a></li>
-          <li><a href="ModuloCliente.html" id="clientesBtn">Clientes</a></li>
-          <li><a href="ModuloProveedor.html" id="proveedoresBtn">Proveedores</a></li>
-          <li><a href="ModuloReportes.html" id="reportesBtn">Reportes</a></li>
-          <li><a href="Login.html" id="logoutBtn">Cerrar Sesión</a></li>
+
+          <li>
+            <a
+              href="Dashboard.html"
+              id="dashboardBtn"
+            >
+              Dashboard
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="ModuloProductos.html"
+              id="productosBtn"
+              class="active"
+            >
+              Productos
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="ModuloVentas.html"
+              id="ventasBtn"
+            >
+              Ventas
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="ModuloCliente.html"
+              id="clientesBtn"
+            >
+              Clientes
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="ModuloProveedor.html"
+              id="proveedoresBtn"
+            >
+              Proveedores
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="ModuloReportes.html"
+              id="reportesBtn"
+            >
+              Reportes
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="Login.html"
+              id="logoutBtn"
+            >
+              Cerrar Sesión
+            </a>
+          </li>
+
         </ul>
+
       </nav>
+
     </aside>
 
-    <!-- Contenido principal -->
+    <!-- ===================================== -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ===================================== -->
+
     <main class="dashboard-container">
+
+      <!-- TOPBAR -->
+
       <div class="topbar">
-        <h1 class="topbar-title">GESTIÓN DE INVENTARIOS</h1>
-        <span class="topbar-user">Usuario: <span id="topbarUser">Invitado</span></span>
+
+        <h1 class="topbar-title">
+          GESTIÓN DE INVENTARIOS
+        </h1>
+
+        <span class="topbar-user">
+
+          Usuario:
+          <span id="topbarUser">
+            Invitado
+          </span>
+
+        </span>
+
       </div>
 
-      <section id="productos" class="productos-section">
+      <!-- ===================================== -->
+      <!-- SECCIÓN PRODUCTOS -->
+      <!-- ===================================== -->
+
+      <section
+        id="productos"
+        class="productos-section"
+      >
+
+        <!-- HEADER -->
+
         <div class="productos-header">
+
           <h2>Productos</h2>
-          <button id="btnNuevoProducto" class="nuevo-btn">NUEVO PRODUCTO +</button>
+
+          <button
+            id="btnNuevoProducto"
+            class="nuevo-btn"
+          >
+            NUEVO PRODUCTO +
+          </button>
+
         </div>
 
-        <!-- Formulario oculto -->
-        <div id="formularioProducto" class="formulario-container" style="display: none;">
-          <h3>Registrar nuevo producto</h3>
+        <!-- ===================================== -->
+        <!-- FORMULARIO -->
+        <!-- ===================================== -->
+
+        <div
+          id="formularioProducto"
+          class="formulario-container"
+          style="display:none;"
+        >
+
+          <h3>
+            Registrar nuevo producto
+          </h3>
+
           <form id="formProducto">
-            <label for="nombreProducto">Nombre:</label>
-            <input type="text" id="nombreProducto" required />
 
-            <label for="categoriaProducto">Categoría:</label>
-            <input type="text" id="categoriaProducto" required />
+            <!-- NOMBRE -->
 
-            <label for="marcaProducto">Marca:</label>
-            <input type="text" id="marcaProducto" required />
+            <label for="nombreProducto">
+              Nombre:
+            </label>
 
-            <label for="precioProducto">Precio:</label>
-            <input type="number" id="precioProducto" required />
+            <input
+              type="text"
+              id="nombreProducto"
+              required
+            />
 
-            <label for="stockProducto">Stock:</label>
-            <input type="number" id="stockProducto" required />
+            <!-- CATEGORÍA -->
 
-            <label for="proveedorProducto">Proveedor:</label>
-            <select id="proveedorProducto" required>
-             <option value="">Seleccione proveedor</option>
-             </select>
-            
-            <label for="estadoProducto">Estado:</label>
-            <select id="estadoProducto" required>
-              <option value="Disponible">Disponible</option>
-              <option value="Agotado">Agotado</option>
+            <label for="categoriaProducto">
+              Categoría:
+            </label>
+
+            <input
+              type="text"
+              id="categoriaProducto"
+              required
+            />
+
+            <!-- MARCA -->
+
+            <label for="marcaProducto">
+              Marca:
+            </label>
+
+            <input
+              type="text"
+              id="marcaProducto"
+              required
+            />
+
+            <!-- PRECIO -->
+
+            <label for="precioProducto">
+              Precio:
+            </label>
+
+            <input
+              type="number"
+              id="precioProducto"
+              required
+            />
+
+            <!-- STOCK -->
+
+            <label for="stockProducto">
+              Stock:
+            </label>
+
+            <input
+              type="number"
+              id="stockProducto"
+              required
+            />
+
+            <!-- ================================= -->
+            <!-- PROVEEDOR -->
+            <!-- ================================= -->
+
+            <label for="proveedorProducto">
+              Proveedor:
+            </label>
+
+            <div
+              style="
+                display:flex;
+                gap:10px;
+                align-items:center;
+              "
+            >
+
+              <select
+                id="proveedorProducto"
+                required
+              >
+
+                <option value="">
+                  Seleccione proveedor
+                </option>
+
+              </select>
+
+              <button
+                type="button"
+                id="btnNuevoProveedorRapido"
+              >
+                + Nuevo
+              </button>
+
+            </div>
+
+            <!-- ================================= -->
+            <!-- MODAL NUEVO PROVEEDOR -->
+            <!-- ================================= -->
+
+            <div
+              id="modalProveedorRapido"
+              style="
+                display:none;
+                background:#fff;
+                border:1px solid #ccc;
+                padding:20px;
+                margin-top:15px;
+                border-radius:10px;
+              "
+            >
+
+              <h3>
+                Crear nuevo proveedor
+              </h3>
+
+              <input
+                type="text"
+                id="nuevoProveedorNombre"
+                placeholder="Nombre proveedor"
+                style="
+                  width:100%;
+                  padding:10px;
+                  margin-bottom:10px;
+                "
+              />
+
+              <button
+                type="button"
+                id="guardarProveedorRapido"
+              >
+                Guardar proveedor
+              </button>
+
+            </div>
+
+            <!-- ESTADO -->
+
+            <label for="estadoProducto">
+              Estado:
+            </label>
+
+            <select
+              id="estadoProducto"
+              required
+            >
+
+              <option value="Disponible">
+                Disponible
+              </option>
+
+              <option value="Agotado">
+                Agotado
+              </option>
+
             </select>
 
-            <button type="submit">Guardar</button>
-            <button type="button" id="cancelarProducto">Cancelar</button>
+            <!-- BOTONES -->
+
+            <button type="submit">
+              Guardar
+            </button>
+
+            <button
+              type="button"
+              id="cancelarProducto"
+            >
+              Cancelar
+            </button>
+
           </form>
+
         </div>
 
-        <!-- Filtro de búsqueda -->
+        <!-- ===================================== -->
+        <!-- FILTRO -->
+        <!-- ===================================== -->
+
         <div class="filter-container">
-          <input type="text" id="filtroProductos" placeholder="🔍 Buscar productos..." style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;" />
+
+          <input
+            type="text"
+            id="filtroProductos"
+            placeholder="🔍 Buscar productos..."
+            style="
+              width:100%;
+              padding:10px;
+              margin:10px 0;
+              border:1px solid #ddd;
+              border-radius:4px;
+            "
+          />
+
         </div>
 
-        <!-- Tabla de productos -->
+        <!-- ===================================== -->
+        <!-- TABLA -->
+        <!-- ===================================== -->
+
         <table id="tablaProductos">
+
           <thead>
+
             <tr>
+
               <th>ID Producto</th>
+
               <th>Nombre</th>
+
               <th>Categoría</th>
+
               <th>Marca</th>
+
               <th>Precio</th>
+
               <th>Stock</th>
+
               <th>Proveedor</th>
+
               <th>Estado</th>
+
               <th>Acciones</th>
+
             </tr>
+
           </thead>
+
           <tbody></tbody>
+
         </table>
-        
-        <!-- Controles de paginación -->
+
+        <!-- PAGINACIÓN -->
+
         <div id="paginationControls"></div>
+
       </section>
+
     </main>
+
   </div>
 
-  <!-- Llamado al archivo JS externo -->
+  <!-- ===================================== -->
+  <!-- SCRIPTS -->
+  <!-- ===================================== -->
+
   <script src="assets/js/user-display.js"></script>
+
   <script src="assets/js/storage.js"></script>
+
   <script src="assets/js/ui.js"></script>
+
   <script src="assets/js/backend-check.js"></script>
+
   <script src="assets/js/pagination.js"></script>
+
   <script src="assets/js/ModuloProductos.js"></script>
+
 </body>
+
 </html>

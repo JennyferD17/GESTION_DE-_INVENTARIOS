@@ -99,36 +99,37 @@ app.post('/api/clientes', async (req, res) => {
 
     if (!Array.isArray(data.clientes)) data.clientes = [];
 
-    // 🔥 DUPLICADO POR DOCUMENTO
-    const existe = data.clientes.find(c =>
-      c.tipoDocumento === cliente.tipoDocumento &&
-      c.numeroDocumento === cliente.numeroDocumento
-    );
+    // 🔥 SI ES NUEVO CLIENTE
+    if (!cliente.idCliente) {
+      const existe = data.clientes.find(c =>
+        c.tipoDocumento === cliente.tipoDocumento &&
+        c.numeroDocumento === cliente.numeroDocumento
+      );
 
-    if (existe && !cliente.idCliente) {
-      return res.status(409).json({
-        success: false,
-        message: 'Cliente ya existe'
-      });
-    }
+      if (existe) {
+        return res.status(409).json({
+          success: false,
+          message: 'Cliente ya existe'
+        });
+      }
 
-    // 🔥 ACTUALIZAR
-    const index = data.clientes.findIndex(
-      c => c.idCliente === cliente.idCliente
-    );
-
-    if (index !== -1) {
-      data.clientes[index] = {
-        ...data.clientes[index],
-        ...cliente
-      };
-    } else {
-      // 🔥 NUEVO CLIENTE
       cliente.idCliente = crypto.randomUUID();
       cliente.pedidos = 0;
       cliente.comprado = 0;
 
       data.clientes.push(cliente);
+    }
+
+    // 🔥 SI ES EDICIÓN
+    else {
+      const index = data.clientes.findIndex(c => c.idCliente === cliente.idCliente);
+
+      if (index !== -1) {
+        data.clientes[index] = {
+          ...data.clientes[index],
+          ...cliente
+        };
+      }
     }
 
     await writeFile(CLIENTES_FILE, data);

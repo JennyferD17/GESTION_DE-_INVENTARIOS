@@ -177,23 +177,48 @@ app.get('/api/productos', async (req, res) => {
  * Genera un ID automático si no se proporciona
  */
 app.post('/api/productos', async (req, res) => {
-  const nuevoProducto = req.body;
+  try {
+    const producto = req.body;
 
-  // Validar datos mínimos del producto
-  if (!nuevoProducto || !nuevoProducto.nombre) {
-    return res.status(400).json({ success: false, message: 'Datos incompletos del producto.' });
+    if (!producto || !producto.nombre) {
+      return res.status(400).json({
+        success: false,
+        message: 'Datos incompletos'
+      });
+    }
+
+    const data = await readFile(PRODUCTOS_FILE, { productos: [] });
+
+    // Buscar si ya existe
+    const index = data.productos.findIndex(
+      p => p.id == producto.id
+    );
+
+    if (index !== -1) {
+      // ACTUALIZAR
+      data.productos[index] = producto;
+    } else {
+      // CREAR
+      producto.id = producto.id || Date.now();
+      data.productos.push(producto);
+    }
+
+    await writeFile(PRODUCTOS_FILE, data);
+
+    res.json({
+      success: true,
+      message: 'Producto guardado correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Error interno'
+    });
   }
-
-  // Generar ID si no existe
-  if (!nuevoProducto.id) nuevoProducto.id = Date.now();
-
-  const data = await readFile(PRODUCTOS_FILE, { productos: [] });
-  data.productos.push(nuevoProducto);
-  await writeFile(PRODUCTOS_FILE, data);
-
-  res.status(201).json({ success: true, message: 'Producto agregado correctamente.' });
 });
-
 // ============================================
 // ENDPOINTS DE LA API - CLIENTES
 // ============================================

@@ -1,12 +1,16 @@
 [
+  
   {
-    "id": 1769211841349,
-    "nombre": "Usuario Prueba",
-    "documento": "123456789",
-    "correo": "prueba@correo.com",
-    "telefono": "3110000000",
-    "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-    "createdAt": "2026-01-23T23:44:01.370Z"
+    "id": 1,
+    "nombre": "Administrador General",
+    "documento": "1000000000",
+    "correo": "admin@empresa.com",
+    "telefono": "3000000000",
+    "password": "HASH_PASSWORD",
+    "rol": "admin",
+    "activo": true,
+    "ultimoAcceso": null,
+    "createdAt": "2026-05-22T00:00:00.000Z"
   },
   {
     "id": 1775698770524,
@@ -15,6 +19,21 @@
     "correo": "jalexandercarmona@gmail.com",
     "telefono": "3194526450",
     "password": "a355f0e66922b712895eb2ce9e603dbe3ccd49cc9fbf28855ea45f3fc923d97d",
+    "rol": "usuario",
+    "activo": true,
+    "ultimoAcceso": null,
     "createdAt": "2026-04-09T01:39:30.535Z"
   }
 ]
+    "id": 1769211841349,
+    "nombre": "Usuario Prueba",
+    "documento": "123456789",
+    "correo": "prueba@correo.com",
+    "telefono": "3110000000",
+    "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+     "rol": "usuario",
+    "activo": true,
+    "ultimoAcceso": null,
+    "createdAt": "2026-01-23T23:44:01.370Z"
+  }
+  ]

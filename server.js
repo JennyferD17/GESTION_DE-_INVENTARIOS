@@ -71,9 +71,9 @@ app.get('/api/clientes', async (req, res) => {
   const data = await readFile(CLIENTES_FILE, { clientes: [] });
 
   const normalizados = data.clientes.map(c => ({
-    idCliente: c.idCliente || c.id,
-    tipoDocumento: c.tipoDocumento || 'CC',
-    numeroDocumento: c.numeroDocumento || 'SIN_REGISTRO',
+    idCliente: c.idCliente,
+    tipoDocumento: c.tipoDocumento,
+    numeroDocumento: c.numeroDocumento,
     nombre: c.nombre,
     email: c.email,
     telefono: c.telefono,
@@ -84,7 +84,6 @@ app.get('/api/clientes', async (req, res) => {
 
   res.json(normalizados);
 });
-
 app.post('/api/clientes', async (req, res) => {
   try {
     const cliente = req.body;

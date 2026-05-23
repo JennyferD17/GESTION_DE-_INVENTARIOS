@@ -1,5 +1,5 @@
 // ============================================
-// SERVER INVENTARIOS
+// SERVER INVENTARIOS - CORREGIDO
 // ============================================
 
 const express = require('express');
@@ -46,12 +46,8 @@ app.use((req, res, next) => {
 });
 
 // ============================================
-// FUNCIONES
+// UTILIDADES
 // ============================================
-
-function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
-}
 
 async function readFile(filePath, defaultContent) {
   try {
@@ -68,19 +64,19 @@ async function writeFile(filePath, data) {
 }
 
 // ============================================
-// CLIENTES (CORREGIDO)
+// CLIENTES (CORREGIDO COMPLETO)
 // ============================================
 
 app.get('/api/clientes', async (req, res) => {
   const data = await readFile(CLIENTES_FILE, { clientes: [] });
-  res.json(data.clientes || []);
+  res.json(data.clientes);
 });
 
 app.post('/api/clientes', async (req, res) => {
   try {
     const cliente = req.body;
 
-    if (!cliente || !cliente.nombre) {
+    if (!cliente.nombre || !cliente.numeroDocumento || !cliente.tipoDocumento) {
       return res.status(400).json({
         success: false,
         message: 'Datos incompletos'
@@ -89,12 +85,25 @@ app.post('/api/clientes', async (req, res) => {
 
     const data = await readFile(CLIENTES_FILE, { clientes: [] });
 
-    if (!Array.isArray(data.clientes)) {
-      data.clientes = [];
+    if (!Array.isArray(data.clientes)) data.clientes = [];
+
+    // 🔥 DUPLICADO POR DOCUMENTO
+    const existe = data.clientes.find(c =>
+      c.tipoDocumento === cliente.tipoDocumento &&
+      c.numeroDocumento === cliente.numeroDocumento
+    );
+
+    if (existe && !cliente.idCliente) {
+      return res.status(409).json({
+        success: false,
+        message: 'Cliente ya existe'
+      });
     }
 
-    // 🔥 SI EXISTE → ACTUALIZA
-    const index = data.clientes.findIndex(c => c.id == cliente.id);
+    // 🔥 ACTUALIZAR
+    const index = data.clientes.findIndex(
+      c => c.idCliente === cliente.idCliente
+    );
 
     if (index !== -1) {
       data.clientes[index] = {
@@ -103,7 +112,7 @@ app.post('/api/clientes', async (req, res) => {
       };
     } else {
       // 🔥 NUEVO CLIENTE
-      cliente.id = Date.now();
+      cliente.idCliente = crypto.randomUUID();
       cliente.pedidos = 0;
       cliente.comprado = 0;
 
@@ -114,58 +123,50 @@ app.post('/api/clientes', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Cliente guardado'
+      message: 'Cliente guardado correctamente'
     });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Error clientes'
+      message: 'Error en clientes'
     });
   }
 });
 
 // ============================================
-// VENTAS (CORREGIDO + ACTUALIZA CLIENTES)
+// VENTAS (CORREGIDO)
 // ============================================
 
 app.get('/api/ventas', async (req, res) => {
   const data = await readFile(VENTAS_FILE, { ventas: [] });
-  res.json(data.ventas || []);
+  res.json(data.ventas);
 });
 
 app.post('/api/ventas', async (req, res) => {
   try {
     const nuevaVenta = req.body;
 
-    if (!nuevaVenta || !nuevaVenta.cliente || !nuevaVenta.productos?.length) {
+    if (!nuevaVenta.idCliente || !nuevaVenta.productos?.length) {
       return res.status(400).json({
         success: false,
         message: 'Datos de venta incompletos'
       });
     }
 
-    // ============================================
-    // GUARDAR VENTA
-    // ============================================
-
     const dataVentas = await readFile(VENTAS_FILE, { ventas: [] });
 
     nuevaVenta.id = Date.now();
-
     dataVentas.ventas.push(nuevaVenta);
 
     await writeFile(VENTAS_FILE, dataVentas);
 
-    // ============================================
-    // 🔥 ACTUALIZAR CLIENTE AUTOMÁTICAMENTE
-    // ============================================
-
+    // 🔥 ACTUALIZAR CLIENTE POR ID
     const dataClientes = await readFile(CLIENTES_FILE, { clientes: [] });
 
     const index = dataClientes.clientes.findIndex(
-      c => c.nombre === nuevaVenta.cliente
+      c => c.idCliente === nuevaVenta.idCliente
     );
 
     if (index !== -1) {
@@ -180,15 +181,14 @@ app.post('/api/ventas', async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Venta registrada con éxito'
+      message: 'Venta registrada'
     });
 
   } catch (error) {
-    console.error('ERROR VENTA:', error);
-
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: 'Error interno'
+      message: 'Error ventas'
     });
   }
 });
@@ -199,7 +199,7 @@ app.post('/api/ventas', async (req, res) => {
 
 app.get('/api/productos', async (req, res) => {
   const data = await readFile(PRODUCTOS_FILE, { productos: [] });
-  res.json(data.productos || []);
+  res.json(data.productos);
 });
 
 app.post('/api/productos', async (req, res) => {
@@ -221,7 +221,7 @@ app.post('/api/productos', async (req, res) => {
 
     res.json({ success: true });
 
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false });
   }
 });
@@ -232,7 +232,7 @@ app.post('/api/productos', async (req, res) => {
 
 app.get('/api/proveedores', async (req, res) => {
   const data = await readFile(PROVEEDORES_FILE, { proveedores: [] });
-  res.json(data.proveedores || []);
+  res.json(data.proveedores);
 });
 
 app.post('/api/proveedores', async (req, res) => {
@@ -253,13 +253,13 @@ app.post('/api/proveedores', async (req, res) => {
 
     res.json({ success: true });
 
-  } catch (error) {
+  } catch {
     res.status(500).json({ success: false });
   }
 });
 
 // ============================================
-// ARCHIVOS ESTÁTICOS
+// ESTÁTICOS
 // ============================================
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -268,28 +268,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'Login.html'));
 });
 
-
-// ============================================
-// HOME
-// ============================================
-
-app.get('/', (req, res) => {
-
-  res.sendFile(
-    path.join(
-      __dirname,
-      'public',
-      'Login.html'
-    )
-  );
-});
-
 // ============================================
 // PING
 // ============================================
 
 app.get('/ping', (req, res) => {
-
   res.json({
     ok: true,
     time: new Date().toISOString()
@@ -297,19 +280,7 @@ app.get('/ping', (req, res) => {
 });
 
 // ============================================
-// START SERVER
-// ============================================
-
-app.listen(port, '0.0.0.0', () => {
-
-  console.log(
-    `Servidor iniciado puerto ${port}`
-  );
-});
-
-
-// ============================================
-// START SERVER
+// SERVER START (SOLO UNA VEZ)
 // ============================================
 
 app.listen(port, '0.0.0.0', () => {

@@ -106,12 +106,7 @@ app.post('/api/register', async (req, res) => {
   try {
 
     const {
-      nombre,
-      documento,
-      correo,
-      telefono,
-      password
-    } = req.body;
+      nombre,      documento,      correo,      telefono,      password,      rol    } = req.body;
 
     if (
       !nombre ||
@@ -127,14 +122,18 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    const users = await readFile(
-      USERS_FILE,
-      []
-    );
+    const users =
+      await readFile(
+        USERS_FILE,
+        []
+      );
 
-    const exists = users.find(
-      u => u.correo === correo.toLowerCase()
-    );
+    const exists =
+      users.find(
+        u =>
+          u.correo ===
+          correo.toLowerCase()
+      );
 
     if (exists) {
 
@@ -144,21 +143,39 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
-    users.push({
+    const newUser = {
 
       id: Date.now(),
 
       nombre,
+
       documento,
 
-      correo: correo.toLowerCase(),
+      correo:
+        correo.toLowerCase(),
 
       telefono,
 
-      password: hashPassword(password)
-    });
+      password:
+        hashPassword(password),
 
-    await writeFile(USERS_FILE, users);
+      rol:
+        rol || 'usuario',
+
+      activo: true,
+
+      ultimoAcceso: null,
+
+      createdAt:
+        new Date().toISOString()
+    };
+
+    users.push(newUser);
+
+    await writeFile(
+      USERS_FILE,
+      users
+    );
 
     res.json({
       success: true,
@@ -167,7 +184,10 @@ app.post('/api/register', async (req, res) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      'ERROR REGISTER:',
+      error
+    );
 
     res.status(500).json({
       success: false,
@@ -175,6 +195,7 @@ app.post('/api/register', async (req, res) => {
     });
   }
 });
+
 
 // ============================================
 // LOGIN
@@ -184,22 +205,45 @@ app.post('/api/login', async (req, res) => {
 
   try {
 
-    const { email, password } = req.body;
+    const {
+      email,
+      password
+    } = req.body;
 
-    const users = await readFile(
-      USERS_FILE,
-      []
-    );
+    if (!email || !password) {
 
-    const user = users.find(
-      u => u.correo === email.toLowerCase()
-    );
+      return res.status(400).json({
+        success: false,
+        message: 'Campos requeridos'
+      });
+    }
+
+    const users =
+      await readFile(
+        USERS_FILE,
+        []
+      );
+
+    const user =
+      users.find(
+        u =>
+          u.correo ===
+          email.toLowerCase()
+      );
 
     if (!user) {
 
       return res.status(401).json({
         success: false,
         message: 'Usuario no encontrado'
+      });
+    }
+
+    if (user.activo === false) {
+
+      return res.status(403).json({
+        success: false,
+        message: 'Usuario deshabilitado'
       });
     }
 
@@ -214,18 +258,40 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
+    user.ultimoAcceso =
+      new Date().toISOString();
+
+    await writeFile(
+      USERS_FILE,
+      users
+    );
+
     res.json({
+
       success: true,
+
       user: {
+
         id: user.id,
+
         nombre: user.nombre,
-        correo: user.correo
+
+        correo: user.correo,
+
+        rol:
+          user.rol || 'usuario',
+
+        activo:
+          user.activo
       }
     });
 
   } catch (error) {
 
-    console.error(error);
+    console.error(
+      'ERROR LOGIN:',
+      error
+    );
 
     res.status(500).json({
       success: false,

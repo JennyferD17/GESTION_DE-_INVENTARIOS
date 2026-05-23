@@ -34,24 +34,19 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.json());
+
 app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
+app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET,POST,PUT,DELETE,OPTIONS'
-  );
-
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type'
-  );
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(204);
-  }
-
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
 
@@ -60,41 +55,21 @@ app.use((req, res, next) => {
 // ============================================
 
 function hashPassword(password) {
-
-  return crypto
-    .createHash('sha256')
-    .update(password)
-    .digest('hex');
+  return crypto.createHash('sha256').update(password).digest('hex');
 }
 
 async function readFile(filePath, defaultContent) {
-
   try {
-
-    const data = await fs.readFile(
-      filePath,
-      'utf8'
-    );
-
+    const data = await fs.readFile(filePath, 'utf8');
     return JSON.parse(data);
-
   } catch {
-
     return defaultContent;
   }
 }
 
 async function writeFile(filePath, data) {
-
-  await fs.mkdir(DATA_DIR, {
-    recursive: true
-  });
-
-  await fs.writeFile(
-    filePath,
-    JSON.stringify(data, null, 2),
-    'utf8'
-  );
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
 }
 
 // ============================================
@@ -102,100 +77,43 @@ async function writeFile(filePath, data) {
 // ============================================
 
 app.post('/api/register', async (req, res) => {
-
   try {
+    const { nombre, documento, correo, telefono, password, rol } = req.body;
 
-    const {
-      nombre,      documento,      correo,      telefono,      password,      rol    } = req.body;
-
-    if (
-      !nombre ||
-      !documento ||
-      !correo ||
-      !telefono ||
-      !password
-    ) {
-
-      return res.status(400).json({
-        success: false,
-        message: 'Campos requeridos'
-      });
+    if (!nombre || !documento || !correo || !telefono || !password) {
+      return res.status(400).json({ success: false, message: 'Campos requeridos' });
     }
 
-    const users =
-      await readFile(
-        USERS_FILE,
-        []
-      );
+    const users = await readFile(USERS_FILE, []);
 
-    const exists =
-      users.find(
-        u =>
-          u.correo ===
-          correo.toLowerCase()
-      );
-
+    const exists = users.find(u => u.correo === correo.toLowerCase());
     if (exists) {
-
-      return res.status(409).json({
-        success: false,
-        message: 'Correo ya existe'
-      });
+      return res.status(409).json({ success: false, message: 'Correo ya existe' });
     }
 
     const newUser = {
-
       id: Date.now(),
-
       nombre,
-
       documento,
-
-      correo:
-        correo.toLowerCase(),
-
+      correo: correo.toLowerCase(),
       telefono,
-
-      password:
-        hashPassword(password),
-
-      rol:
-        rol || 'usuario',
-
+      password: hashPassword(password),
+      rol: rol || 'usuario',
       activo: true,
-
       ultimoAcceso: null,
-
-      createdAt:
-        new Date().toISOString()
+      createdAt: new Date().toISOString()
     };
 
     users.push(newUser);
+    await writeFile(USERS_FILE, users);
 
-    await writeFile(
-      USERS_FILE,
-      users
-    );
-
-    res.json({
-      success: true,
-      message: 'Usuario registrado'
-    });
+    res.json({ success: true, message: 'Usuario registrado' });
 
   } catch (error) {
-
-    console.error(
-      'ERROR REGISTER:',
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message: 'Error registro'
-    });
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Error registro' });
   }
 });
-
 
 // ============================================
 // LOGIN
@@ -590,37 +508,88 @@ app.post('/api/proveedores', async (req, res) => {
 });
 
 // ============================================
-// VENTAS
+// VENTAS (CORREGIDO COMPLETO)
 // ============================================
 
+// GET VENTAS
+app.get('/api/ventas', async (req, res) => {
+  const data = await readFile(VENTAS_FILE, { ventas: [] });
+  res.json(data.ventas || []);
+});
+
+// POST VENTA
 app.post('/api/ventas', async (req, res) => {
-
   try {
+    const venta = req.body;
 
-    const venta =
-      req.body;
-
-    const data =
-      await readFile(
-        VENTAS_FILE,
-        { ventas: [] }
-      );
-
-    if (
-      !Array.isArray(
-        data.ventas
-      )
-    ) {
-
-      data.ventas = [];
-    }
+    const data = await readFile(VENTAS_FILE, { ventas: [] });
 
     data.ventas.push(venta);
+    await writeFile(VENTAS_FILE, data);
 
-    await writeFile(
-      VENTAS_FILE,
-      data
-    );
+    // actualizar cliente
+    const clientesData = await readFile(CLIENTES_FILE, { clientes: [] });
+
+    const cliente = clientesData.clientes.find(c => c.nombre === venta.cliente);
+
+    if (cliente) {
+      cliente.pedidos = (cliente.pedidos || 0) + 1;
+      cliente.comprado = (cliente.comprado || 0) + Number(venta.total);
+    }
+
+    await writeFile(CLIENTES_FILE, clientesData);
+
+    res.json({ success: true, message: 'Venta guardada' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false });
+  }
+});
+
+// PUT VENTA
+app.put('/api/ventas/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const venta = req.body;
+
+    const data = await readFile(VENTAS_FILE, { ventas: [] });
+
+    const index = data.ventas.findIndex(v => String(v.id) === String(id));
+
+    if (index === -1) {
+      return res.status(404).json({ success: false });
+    }
+
+    data.ventas[index] = venta;
+
+    await writeFile(VENTAS_FILE, data);
+
+    res.json({ success: true, message: 'Venta actualizada' });
+
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
+});
+
+// DELETE VENTA
+app.delete('/api/ventas/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+
+    const data = await readFile(VENTAS_FILE, { ventas: [] });
+
+    data.ventas = data.ventas.filter(v => String(v.id) !== String(id));
+
+    await writeFile(VENTAS_FILE, data);
+
+    res.json({ success: true, message: 'Venta eliminada' });
+
+  } catch (error) {
+    res.status(500).json({ success: false });
+  }
+});
+
 
     // =========================
     // ACTUALIZAR CLIENTE

@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const idClienteInput = document.getElementById('idCliente');
   const clienteVentaInput = document.getElementById('clienteVenta');
-
   const selectProducto = document.getElementById('idProducto');
 
   // Variables de estado
@@ -26,9 +25,159 @@ document.addEventListener('DOMContentLoaded', function () {
   let clientes = [];
   let salesData = [];
 
-  // =========================
-  // CREAR FILA DE LA TABLA
-  // =========================
+  // ========================================================
+  // PASO 1: ASIGNAR EVENTOS INMEDIATAMENTE (Anti-bloqueo)
+  // ========================================================
+
+  if (btnNuevaVenta) {
+    btnNuevaVenta.addEventListener('click', () => {
+      editingId = null;
+      formVenta.reset();
+      productosEnVenta = [];
+      renderProductos();
+      
+      // Asigna la fecha actual automáticamente en formato YYYY-MM-DD
+      const fechaInput = document.getElementById('fechaVenta');
+      if (fechaInput) {
+        fechaInput.value = new Date().toISOString().split('T')[0];
+      }
+      
+      // Muestra el formulario en pantalla
+      if (formularioVenta) formularioVenta.style.display = 'block';
+      if (productosAgregados) productosAgregados.style.display = 'none';
+    });
+  }
+
+  if (cancelarVenta) {
+    cancelarVenta.addEventListener('click', () => {
+      formVenta.reset();
+      productosEnVenta = [];
+      if (formularioVenta) formularioVenta.style.display = 'none';
+      editingId = null;
+    });
+  }
+
+  if (btnAgregarProducto) {
+    btnAgregarProducto.addEventListener('click', () => {
+      const id = selectProducto.value;
+      const cantidadInput = document.getElementById('cantidadProducto');
+      const cantidad = Number(cantidadInput ? cantidadInput.value : 1);
+
+      if (!id) {
+        alert('Por favor, seleccione un producto.');
+        return;
+      }
+
+      const producto = productos.find(p => p.id == id);
+      if (!producto) return;
+
+      const existente = productosEnVenta.find(p => p.id == id);
+
+      if (existente) {
+        existente.cantidad += cantidad;
+      } else {
+        productosEnVenta.push({
+          id: producto.id,
+          nombre: producto.nombre,
+          precio: Number(producto.precio),
+          cantidad
+        });
+      }
+
+      if (productosEnVenta.length > 0 && productosAgregados) {
+        productosAgregados.style.display = 'block';
+      }
+
+      renderProductos();
+      
+      selectProducto.value = '';
+      if (cantidadInput) cantidadInput.value = '1';
+    });
+  }
+
+  if (idClienteInput) {
+    idClienteInput.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+      e.preventDefault();
+
+      const id = idClienteInput.value.trim();
+      const cliente = clientes.find(c => c.id == id);
+
+      if (!cliente) {
+        clienteVentaInput.value = '';
+        alert('Cliente no encontrado en el sistema.');
+        return;
+      }
+
+      clienteVentaInput.value = cliente.nombre;
+    });
+  }
+
+  if (listaProductosVenta) {
+    listaProductosVenta.addEventListener('click', (e) => {
+      const botonBorrar = e.target.closest('.del');
+      if (!botonBorrar) return;
+
+      const i = botonBorrar.dataset.i;
+      productosEnVenta.splice(i, 1);
+      
+      if (productosEnVenta.length === 0 && productosAgregados) {
+        productosAgregados.style.display = 'none';
+      }
+      
+      renderProductos();
+    });
+  }
+
+  if (formVenta) {
+    formVenta.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (productosEnVenta.length === 0) {
+        alert('Debe añadir al menos un producto a la venta.');
+        return;
+      }
+
+      const venta = {
+        id: editingId || Date.now(),
+        cliente: clienteVentaInput.value,
+        idCliente: idClienteInput.value,
+        fecha: document.getElementById('fechaVenta').value,
+        estado: document.getElementById('estadoVenta').value,
+        admin: document.getElementById('adminVenta').value,
+        total: Number(document.getElementById('totalVenta').value),
+        productos: productosEnVenta
+      };
+
+      const url = editingId ? `/api/ventas/${editingId}` : '/api/ventas';
+      const method = editingId ? 'PUT' : 'POST';
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(venta)
+        });
+
+        if (response.ok) {
+          productosEnVenta = [];
+          formVenta.reset();
+          if (formularioVenta) formularioVenta.style.display = 'none';
+          loadSales();
+        } else {
+          alert('Hubo un problema al intentar procesar la venta en el servidor.');
+        }
+      } catch (error) {
+        console.error('Error al guardar venta:', error);
+        alert('Error de conexión con el servidor.');
+      }
+    });
+  }
+
+  // ========================================================
+  // PASO 2: FUNCIONES DE RENDERIZADO INTERNO
+  // ========================================================
+
   function createRow(v) {
     const tr = document.createElement('tr');
     tr.dataset.id = v.id;
@@ -49,140 +198,8 @@ document.addEventListener('DOMContentLoaded', function () {
     return tr;
   }
 
-  // =========================
-  // CARGAR VENTAS DESDE EL API
-  // =========================
-  async function loadSales() {
-    try {
-      const res = await fetch('/api/ventas');
-      const data = await res.json();
-
-      salesData = data;
-      tablaBody.innerHTML = '';
-
-      data.forEach(v => tablaBody.appendChild(createRow(v)));
-    } catch (error) {
-      console.error('Error al cargar ventas:', error);
-    }
-  }
-
-  // =========================
-  // CARGAR PRODUCTOS Y CLIENTES
-  // =========================
-  async function loadData() {
-    try {
-      const [rProd, rCli] = await Promise.all([
-        fetch('/api/productos'),
-        fetch('/api/clientes')
-      ]);
-
-      productos = await rProd.json();
-      clientes = await rCli.json();
-
-      selectProducto.innerHTML = '<option value="">-- Seleccione un producto --</option>';
-
-      productos.forEach(p => {
-        const opt = document.createElement('option');
-        opt.value = p.id;
-        opt.textContent = `${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}`;
-        selectProducto.appendChild(opt);
-      });
-    } catch (error) {
-      console.error('Error al cargar productos/clientes:', error);
-    }
-  }
-
-  // =========================
-  // EVENTO: BOTÓN NUEVA VENTA
-  // =========================
-  btnNuevaVenta.addEventListener('click', () => {
-    editingId = null;
-    formVenta.reset();
-    productosEnVenta = [];
-    renderProductos();
-    
-    // Asigna la fecha actual automáticamente en formato YYYY-MM-DD
-    document.getElementById('fechaVenta').value = new Date().toISOString().split('T')[0];
-    
-    // Muestra el formulario en pantalla
-    formularioVenta.style.display = 'block';
-    productosAgregados.style.display = 'none'; // Oculto hasta que agreguen algo
-  });
-
-  // =========================
-  // EVENTO: BOTÓN CANCELAR VENTA
-  // =========================
-  cancelarVenta.addEventListener('click', () => {
-    formVenta.reset();
-    productosEnVenta = [];
-    formularioVenta.style.display = 'none';
-    editingId = null;
-  });
-
-  // =========================
-  // BUSCAR CLIENTE POR ID (TAB)
-  // =========================
-  idClienteInput.addEventListener('keydown', (e) => {
-    if (e.key !== 'Tab') return;
-
-    e.preventDefault();
-
-    const id = idClienteInput.value.trim();
-    const cliente = clientes.find(c => c.id == id);
-
-    if (!cliente) {
-      clienteVentaInput.value = '';
-      alert('Cliente no encontrado en el sistema.');
-      return;
-    }
-
-    clienteVentaInput.value = cliente.nombre;
-  });
-
-  // =========================
-  // AGREGAR PRODUCTO AL CARRITO
-  // =========================
-  btnAgregarProducto.addEventListener('click', () => {
-    const id = selectProducto.value;
-    const cantidad = Number(document.getElementById('cantidadProducto').value || 1);
-
-    if (!id) {
-      alert('Por favor, seleccione un producto.');
-      return;
-    }
-
-    const producto = productos.find(p => p.id == id);
-    if (!producto) return;
-
-    const existente = productosEnVenta.find(p => p.id == id);
-
-    if (existente) {
-      existente.cantidad += cantidad;
-    } else {
-      productosEnVenta.push({
-        id: producto.id,
-        nombre: producto.nombre,
-        precio: Number(producto.precio),
-        cantidad
-      });
-    }
-
-    // Mostrar la tabla de productos si estaba oculta
-    if (productosEnVenta.length > 0) {
-      productosAgregados.style.display = 'block';
-    }
-
-    renderProductos();
-    
-    // Resetear selección de producto y cantidad por comodidad
-    selectProducto.value = '';
-    document.getElementById('cantidadProducto').value = '1';
-  });
-
-  // =========================
-  // RENDERIZAR TABLA DE PRODUCTOS AGRUPADOS
-  // =========================
   function renderProductos() {
+    if (!listaProductosVenta) return;
     listaProductosVenta.innerHTML = '';
     let total = 0;
 
@@ -191,7 +208,6 @@ document.addEventListener('DOMContentLoaded', function () {
       total += subtotal;
 
       const tr = document.createElement('tr');
-
       tr.innerHTML = `
         <td style="padding: 8px; border: 1px solid #ddd;">${p.nombre}</td>
         <td style="padding: 8px; text-align: center; border: 1px solid #ddd;">${p.cantidad}</td>
@@ -201,78 +217,62 @@ document.addEventListener('DOMContentLoaded', function () {
           <button data-i="${i}" class="del" type="button" style="background: none; border: none; cursor: pointer;">🗑️</button>
         </td>
       `;
-
       listaProductosVenta.appendChild(tr);
     });
 
-    document.getElementById('totalVenta').value = total;
+    const totalInput = document.getElementById('totalVenta');
+    if (totalInput) totalInput.value = total;
   }
 
-  // ELIMINAR UN PRODUCTO DEL CARRITO
-  listaProductosVenta.addEventListener('click', (e) => {
-    // Busca si el clic fue en el botón de basura o dentro de él
-    const botonBorrar = e.target.closest('.del');
-    if (!botonBorrar) return;
+  // ========================================================
+  // PASO 3: ASINCRONÍA REORGANIZADA CON CONTROLES DE ERROR
+  // ========================================================
 
-    const i = botonBorrar.dataset.i;
-    productosEnVenta.splice(i, 1);
-    
-    if (productosEnVenta.length === 0) {
-      productosAgregados.style.display = 'none';
-    }
-    
-    renderProductos();
-  });
-
-  // =========================
-  // GUARDAR VENTA (SUBMIT FORM)
-  // =========================
-  formVenta.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    if (productosEnVenta.length === 0) {
-      alert('Debe añadir al menos un producto a la venta.');
-      return;
-    }
-
-    const venta = {
-      id: editingId || Date.now(),
-      cliente: clienteVentaInput.value,
-      idCliente: idClienteInput.value,
-      fecha: document.getElementById('fechaVenta').value,
-      estado: document.getElementById('estadoVenta').value,
-      admin: document.getElementById('adminVenta').value,
-      total: Number(document.getElementById('totalVenta').value),
-      productos: productosEnVenta
-    };
-
-    const url = editingId ? `/api/ventas/${editingId}` : '/api/ventas';
-    const method = editingId ? 'PUT' : 'POST';
-
+  async function loadSales() {
     try {
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(venta)
-      });
+      const res = await fetch('/api/ventas');
+      if (!res.ok) throw new Error('Error en respuesta de ventas');
+      const data = await res.json();
 
-      if (response.ok) {
-        productosEnVenta = [];
-        formVenta.reset();
-        formularioVenta.style.display = 'none';
-        loadSales();
-      } else {
-        alert('Hubo un problema al intentar procesar la venta en el servidor.');
+      salesData = data;
+      if (tablaBody) {
+        tablaBody.innerHTML = '';
+        data.forEach(v => tablaBody.appendChild(createRow(v)));
       }
     } catch (error) {
-      console.error('Error al guardar venta:', error);
-      alert('Error de conexión con el servidor.');
+      console.error('Error al cargar ventas:', error);
     }
-  });
+  }
 
-  // =========================
-  // INICIALIZACIÓN
-  // =========================
+  async function loadData() {
+    try {
+      const [rProd, rCli] = await Promise.all([
+        fetch('/api/productos').catch(() => null),
+        fetch('/api/clientes').catch(() => null)
+      ]);
+
+      if (rProd && rProd.ok) {
+        productos = await rProd.json();
+        if (selectProducto) {
+          selectProducto.innerHTML = '<option value="">-- Seleccione un producto --</option>';
+          productos.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}`;
+            selectProducto.appendChild(opt);
+          });
+        }
+      }
+
+      if (rCli && rCli.ok) {
+        clientes = await rCli.json();
+      }
+    } catch (error) {
+      console.error('Error general al cargar productos/clientes:', error);
+    }
+  }
+
+  // Ejecutamos las llamadas al servidor al final de todo de manera segura
   loadSales();
   loadData();
 });

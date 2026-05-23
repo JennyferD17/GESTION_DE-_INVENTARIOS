@@ -3,10 +3,10 @@
   {
     "id": 1,
     "nombre": "Administrador General",
-    "documento": "1000000000",
+    "documento": "123456789",
     "correo": "admin@empresa.com",
     "telefono": "3000000000",
-    "password": "HASH_PASSWORD",
+    "password": "240be518fabd2724ddb6f04eeb3c371b4f4f2e5f8f3f0c7b5d1f2e9c6a5b4d3",
     "rol": "admin",
     "activo": true,
     "ultimoAcceso": null,

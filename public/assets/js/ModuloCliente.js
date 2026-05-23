@@ -15,10 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!numero) return false;
 
     switch (tipo) {
-      case 'CC':
-        return /^[0-9]{6,12}$/.test(numero);
-      case 'NIT':
-        return /^[0-9]{9}-?[0-9]$/.test(numero);
+      case 'CC': return /^[0-9]{6,12}$/.test(numero);
+      case 'NIT': return /^[0-9]{9}-?[0-9]$/.test(numero);
       case 'PEP':
       case 'PPT':
       case 'PAS':
@@ -34,14 +32,14 @@ document.addEventListener('DOMContentLoaded', function () {
     tr.dataset.id = cliente.idCliente;
 
     tr.innerHTML = `
-     <td>${cliente.tipoDocumento}</td>
-      <td>${cliente.idCliente}</td>
+      <td>${cliente.tipoDocumento}</td>
+      <td>${cliente.numeroDocumento}</td>
       <td>${cliente.nombre}</td>
       <td>${cliente.email}</td>
       <td>${cliente.telefono}</td>
       <td>${cliente.fecha}</td>
       <td>${cliente.pedidos || 0}</td>
-       <td>$${parseFloat(cliente.comprado || 0).toLocaleString('es-CO')}</td>
+      <td>$${parseFloat(cliente.comprado || 0).toLocaleString('es-CO')}</td>
       <td>
         <button class="btn-edit">✏️</button>
         <button class="btn-delete">🗑️</button>
@@ -56,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const clients = await res.json();
 
       clientsData = clients;
+
       pagination = new Pagination(clientsData, 10);
 
       const render = () => {
@@ -76,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   loadClients();
 
+  // FILTRO
   filtroInput.addEventListener('input', function () {
     const term = this.value.toLowerCase();
 
@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
     pagination.onPageChange();
   });
 
+  // NUEVO CLIENTE
   btnNuevoCliente.addEventListener('click', () => {
     editingId = null;
     formCliente.reset();
@@ -102,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
     editingId = null;
   });
 
+  // GUARDAR CLIENTE
   formCliente.addEventListener('submit', async function (e) {
     e.preventDefault();
 
@@ -114,31 +116,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const cliente = {
-      idCliente: editingId || crypto.randomUUID(),
+      idCliente: editingId,
       tipoDocumento,
       numeroDocumento,
       nombre: document.getElementById('nombreCliente').value.trim(),
       email: document.getElementById('emailCliente').value.trim(),
       telefono: document.getElementById('telefonoCliente').value.trim(),
-      fecha: document.getElementById('fechaRegistro').value,
-      pedidos: 0,
-      comprado: 0
+      fecha: document.getElementById('fechaRegistro').value
     };
 
-    const res = await fetch('/api/clientes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cliente)
-    });
+    try {
+      const res = await fetch('/api/clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cliente)
+      });
 
-    if (res.ok) {
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || 'Error guardando cliente');
+        return;
+      }
+
       loadClients();
-    }
 
-    formularioCliente.style.display = 'none';
-    formCliente.reset();
+      formularioCliente.style.display = 'none';
+      formCliente.reset();
+      editingId = null;
+
+    } catch (err) {
+      console.error(err);
+      alert('Error de conexión con el servidor');
+    }
   });
 
+  // EDITAR / ELIMINAR
   tablaBody.addEventListener('click', function (e) {
     const row = e.target.closest('tr');
     if (!row) return;
@@ -148,19 +161,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (e.target.classList.contains('btn-edit')) {
       const cells = row.querySelectorAll('td');
 
-      document.getElementById('tipoDocumento').value = cells[1].textContent;
-      document.getElementById('numeroDocumento').value = cells[2].textContent;
-      document.getElementById('nombreCliente').value = cells[3].textContent;
-      document.getElementById('emailCliente').value = cells[4].textContent;
-      document.getElementById('telefonoCliente').value = cells[5].textContent;
-      document.getElementById('fechaRegistro').value = cells[6].textContent;
+      document.getElementById('tipoDocumento').value = cells[0].textContent;
+      document.getElementById('numeroDocumento').value = cells[1].textContent;
+      document.getElementById('nombreCliente').value = cells[2].textContent;
+      document.getElementById('emailCliente').value = cells[3].textContent;
+      document.getElementById('telefonoCliente').value = cells[4].textContent;
+      document.getElementById('fechaRegistro').value = cells[5].textContent;
 
       editingId = id;
       formularioCliente.style.display = 'block';
     }
 
     if (e.target.classList.contains('btn-delete')) {
-      alert('Eliminar pendiente backend');
+      alert('Eliminar aún no implementado');
     }
   });
 

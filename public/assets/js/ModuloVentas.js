@@ -1,10 +1,9 @@
-// ModuloVentas.js – Gestión de Ventas con paginación
+// ============================================
+// MODULO VENTAS - CORREGIDO
+// ============================================
 
 document.addEventListener('DOMContentLoaded', function () {
-  /**
-   * Módulo de Ventas
-   * Gestiona la creación, edición y eliminación de ventas con soporte para múltiples productos.
-   */
+
   const btnNuevaVenta = document.getElementById('btnNuevaVenta');
   const formularioVenta = document.getElementById('formularioVenta');
   const cancelarVenta = document.getElementById('cancelarVenta');
@@ -14,619 +13,204 @@ document.addEventListener('DOMContentLoaded', function () {
   const listaProductosVenta = document.getElementById('listaProductosVenta');
   const productosAgregados = document.getElementById('productosAgregados');
 
-  let editingId = null;
-  let productosEnVenta = []; // productos agregados a la venta actual
-  let productos = []; // cache de productos
-  let clientes = []; // cache de clientes
-  let salesData = []; // cache de ventas
-  let pagination = null; // instancia de Pagination
+  const idClienteInput = document.getElementById('idCliente');
+  const clienteVentaInput = document.getElementById('clienteVenta');
+  const telefonoClienteInput = document.getElementById('telefonoCliente');
+  const emailClienteInput = document.getElementById('emailCliente');
 
-  /**
-   * Crea una fila de tabla para una venta.
-   */
-  function createRow(venta) {
+  const selectProducto = document.getElementById('idProducto');
+
+  let editingId = null;
+  let productosEnVenta = [];
+  let productos = [];
+  let clientes = [];
+  let salesData = [];
+  let pagination = null;
+
+  // =========================
+  // CREAR FILA
+  // =========================
+  function createRow(v) {
     const tr = document.createElement('tr');
-    tr.dataset.id = venta.id;
+    tr.dataset.id = v.id;
+
     tr.innerHTML = `
-      <td>${venta.id}</td>
-      <td>${venta.cliente}</td>
-      <td>${venta.fecha}</td>
-      <td>${venta.estado}</td>
-      <td>$${parseFloat(venta.total).toLocaleString('es-CO')}</td>
-      <td>${venta.descripcion || 'N/A'}</td>
-      <td>${venta.admin}</td>
+      <td>${v.id}</td>
+      <td>${v.cliente}</td>
+      <td>${v.fecha}</td>
+      <td>${v.estado}</td>
+      <td>$${Number(v.total).toLocaleString('es-CO')}</td>
+      <td>${v.admin}</td>
       <td>
-        <div class="action-buttons">
-          <button class="btn-detail" title="Ver Detalle"><span class="icono">👁️</span></button>
-          <button class="btn-edit" title="Editar"><span class="icono">✏️</span></button>
-          <button class="btn-delete" title="Eliminar"><span class="icono eliminar">🗑️</span></button>
-        </div>
+        <button class="btn-detail">👁️</button>
+        <button class="btn-edit">✏️</button>
+        <button class="btn-delete">🗑️</button>
       </td>
     `;
     return tr;
   }
 
-  /**
-   * Muestra el modal con el detalle de la venta.
-   */
-  function showDetail(venta) {
-    document.getElementById('detalleId').textContent = venta.id;
-    document.getElementById('detalleCliente').textContent = venta.cliente;
-    document.getElementById('detalleFecha').textContent = venta.fecha;
-    document.getElementById('detalleEstado').textContent = venta.estado;
-    document.getElementById('detalleAdmin').textContent = venta.admin;
-    document.getElementById('detalleTotal').textContent = `$${parseFloat(venta.total).toLocaleString('es-CO')}`;
-
-    const tbody = document.getElementById('detalleProductosBody');
-    tbody.innerHTML = '';
-
-    if (venta.productos && Array.isArray(venta.productos)) {
-      venta.productos.forEach(p => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="padding: 8px; border: 1px solid #ddd;">${p.nombre}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${p.cantidad}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${parseFloat(p.precio).toLocaleString('es-CO')}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${(p.precio * p.cantidad).toLocaleString('es-CO')}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    } else {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay información de productos detallada.</td></tr>';
-    }
-
-    document.getElementById('modalDetalleVenta').style.display = 'block';
-  }
-
-  // Cerrar modal
-  const modal = document.getElementById('modalDetalleVenta');
-  const spanClose = document.querySelector('.close-modal');
-  if (spanClose) {
-    spanClose.onclick = function () {
-      modal.style.display = "none";
-    };
-  }
-  window.onclick = function (event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-    }
-  };
-
-  /**
-   * Carga las ventas desde el backend y muestra la página actual.
-   */
+  // =========================
+  // CARGAR VENTAS
+  // =========================
   async function loadSales() {
-    try {
-      const res = await fetch('/api/ventas');
-      const sales = await res.json();
-      console.log('Ventas cargadas:', sales.length);
-      salesData = sales;
-      pagination = new Pagination(salesData, 10);
-      const renderCurrentPage = () => {
-        tablaBody.innerHTML = '';
-        pagination.getCurrentPageItems().forEach(item => tablaBody.appendChild(createRow(item)));
-      };
-      pagination.onPageChange = renderCurrentPage;
-      renderCurrentPage();
-      pagination.renderControls('paginationVentas');
-    } catch (err) {
-      console.error('Error al cargar ventas:', err);
-    }
+    const res = await fetch('/api/ventas');
+    const data = await res.json();
+
+    salesData = data;
+    tablaBody.innerHTML = '';
+
+    data.forEach(v => tablaBody.appendChild(createRow(v)));
   }
 
-  /**
-   * Carga productos y clientes para el formulario.
-   * AJUSTADO: Ahora pobla dinámicamente el elemento <select> de productos
-   */
+  // =========================
+  // CARGAR DATOS
+  // =========================
   async function loadData() {
-    try {
-      const [resProductos, resClientes] = await Promise.all([
-        fetch('/api/productos'),
-        fetch('/api/clientes')
-      ]);
-      productos = await resProductos.json();
-      clientes = await resClientes.json();
-      console.log('Datos cargados:', productos.length, 'productos,', clientes.length, 'clientes');
+    const [rProd, rCli] = await Promise.all([
+      fetch('/api/productos'),
+      fetch('/api/clientes')
+    ]);
 
-      // --- CAMBIO: Rellenar el elemento select de productos ---
-      const selectProducto = document.getElementById('idProducto');
-      if (selectProducto) {
-        selectProducto.innerHTML = '<option value="">-- Seleccione un producto --</option>';
-        productos.forEach(p => {
-          const option = document.createElement('option');
-          option.value = p.id;
-          // Formateamos visualmente para el vendedor: Nombre - Precio (Stock disponible)
-          const precioFormateado = parseFloat(p.precio).toLocaleString('es-CO');
-          option.textContent = `${p.nombre} - $${precioFormateado} (Stock: ${p.stock || 0})`;
-          selectProducto.appendChild(option);
-        });
-      }
+    productos = await rProd.json();
+    clientes = await rCli.json();
 
-    } catch (err) {
-      console.error('Error al cargar datos:', err);
-    }
-  }
+    selectProducto.innerHTML = '<option value="">-- Producto --</option>';
 
-  // Inicializar datos
-  loadSales();
-  loadData();
-  console.debug('ModuloVentas: inicializando...');
-
-  // --- FILTRADO DE TABLA ---
-  const filtroInput = document.getElementById('filtroVentas');
-  if (filtroInput) {
-    filtroInput.addEventListener('input', function () {
-      const term = this.value.toLowerCase();
-      const filtered = salesData.filter(s => Object.values(s).some(v => String(v).toLowerCase().includes(term)));
-      pagination.updateItems(filtered);
-      pagination.renderControls('paginationVentas');
-      pagination.onPageChange();
+    productos.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = `${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}`;
+      selectProducto.appendChild(opt);
     });
   }
 
-  /**
-   * Actualiza la tabla de productos dentro de la venta y el total.
-   */
-  function actualizarTablaProductos() {
+  // =========================
+  // BUSCAR CLIENTE
+  // =========================
+  idClienteInput.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+
+    e.preventDefault();
+
+    const id = idClienteInput.value.trim();
+    const cliente = clientes.find(c => c.id == id);
+
+    if (!cliente) {
+      clienteVentaInput.value = '';
+      telefonoClienteInput.value = '';
+      emailClienteInput.value = '';
+      return;
+    }
+
+    clienteVentaInput.value = cliente.nombre;
+    telefonoClienteInput.value = cliente.telefono || '';
+    emailClienteInput.value = cliente.email || '';
+  });
+
+  // =========================
+  // AGREGAR PRODUCTO
+  // =========================
+  btnAgregarProducto.addEventListener('click', () => {
+
+    const id = selectProducto.value;
+    const cantidad = Number(document.getElementById('cantidadProducto').value || 1);
+
+    const producto = productos.find(p => p.id == id);
+    if (!producto) return;
+
+    const existente = productosEnVenta.find(p => p.id == id);
+
+    if (existente) {
+      existente.cantidad += cantidad;
+    } else {
+      productosEnVenta.push({
+        id: producto.id,
+        nombre: producto.nombre,
+        precio: Number(producto.precio),
+        cantidad
+      });
+    }
+
+    renderProductos();
+  });
+
+  // =========================
+  // RENDER PRODUCTOS
+  // =========================
+  function renderProductos() {
+
     listaProductosVenta.innerHTML = '';
+
     let total = 0;
-    productosEnVenta.forEach((item, index) => {
-      const subtotal = item.precio * item.cantidad;
+
+    productosEnVenta.forEach((p, i) => {
+
+      const subtotal = p.precio * p.cantidad;
       total += subtotal;
+
       const tr = document.createElement('tr');
+
       tr.innerHTML = `
-        <td style="padding: 8px; border: 1px solid #ddd;">${item.nombre}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${item.cantidad}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${item.precio.toLocaleString('es-CO')}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; text-align: right;">$${subtotal.toLocaleString('es-CO')}</td>
-        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">
-          <button type="button" class="btn-delete" data-index="${index}" title="Eliminar">
-            <span class="icono eliminar">🗑️</span>
-          </button>
-        </td>
+        <td>${p.nombre}</td>
+        <td>${p.cantidad}</td>
+        <td>$${p.precio.toLocaleString('es-CO')}</td>
+        <td>$${subtotal.toLocaleString('es-CO')}</td>
+        <td><button data-i="${i}" class="del">🗑️</button></td>
       `;
+
       listaProductosVenta.appendChild(tr);
     });
+
     document.getElementById('totalVenta').value = total;
-    productosAgregados.style.display = productosEnVenta.length > 0 ? 'block' : 'none';
   }
 
-  /**
-   * Buscar cliente por ID (Tab).
-   */
-  const idClienteInput = document.getElementById('idCliente');
-  const clienteVentaInput = document.getElementById('clienteVenta');
-  const telefonoClienteInput =
-  document.getElementById(
-    'telefonoCliente'
-  );
+  listaProductosVenta.addEventListener('click', (e) => {
+    if (!e.target.classList.contains('del')) return;
 
-const emailClienteInput =
-  document.getElementById(
-    'emailCliente'
-  );
-
-const btnNuevoCliente =
-  document.getElementById(
-    'btnNuevoCliente'
-  );
-
-const nuevoClienteBox =
-  document.getElementById(
-    'nuevoClienteBox'
-  );
-
-const guardarNuevoCliente =
-  document.getElementById(
-    'guardarNuevoCliente'
-  );
-  if (idClienteInput) {
-    idClienteInput.addEventListener('keydown', async function (e) {
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const id = this.value.trim();
-        if (!id) return;
-        const cliente = clientes.find(c => c.id == id);
-       if (cliente) {
-
-  clienteVentaInput.value =
-    cliente.nombre;
-
-  telefonoClienteInput.value =
-    cliente.telefono || '';
-
-  emailClienteInput.value =
-    cliente.email || '';
-
-  nuevoClienteBox.style.display =
-    'none';
-
-  if (
-    window.ui &&
-    ui.showToast
-  ) {
-
-    ui.showToast(
-      'Cliente encontrado',
-      'success'
-    );
-  }
-
-} else {
-
-  clienteVentaInput.value = '';
-  telefonoClienteInput.value = '';
-  emailClienteInput.value = '';
-
-  nuevoClienteBox.style.display =
-    'block';
-
-  if (
-    window.ui &&
-    ui.showToast
-  ) {
-
-    ui.showToast(
-      'Cliente no encontrado',
-      'warning'
-    );
-  }
-}
-          if (window.ui && ui.showToast) ui.showToast('Cliente encontrado', 'success');
-        } else {
-          clienteVentaInput.value = '';
-          if (window.ui && ui.showToast) ui.showToast('Cliente no encontrado', 'warning');
-        }
-      }
-    });
-  }
-
-  /**
-   * Agregar producto a la venta.
-   * AJUSTADO: Lee el ID directamente desde el select y devuelve la selección a su estado base limpio
-   */
-  btnAgregarProducto.addEventListener('click', async function () {
-    const idProducto = document.getElementById('idProducto').value; // Removido .trim() innecesario para un select
-    const cantidad = parseInt(document.getElementById('cantidadProducto').value) || 1;
-    
-    if (!idProducto) {
-      if (window.ui && ui.showToast) ui.showToast('Por favor, seleccione un producto de la lista', 'warning');
-      return;
-    }
-    
-    const producto = productos.find(p => p.id == idProducto);
-    if (producto) {
-      // Validación extra: Verificar si hay stock suficiente antes de añadir al carrito
-      if (producto.stock && cantidad > producto.stock) {
-        if (window.ui && ui.showToast) ui.showToast(`Stock insuficiente. Solo quedan ${producto.stock} unidades`, 'warning');
-        return;
-      }
-
-      const existente = productosEnVenta.find(p => p.id == idProducto);
-      if (existente) {
-        existente.cantidad += cantidad;
-      } else {
-        productosEnVenta.push({
-          id: producto.id,
-          nombre: producto.nombre,
-          precio: parseFloat(producto.precio),
-          cantidad: cantidad
-        });
-      }
-      actualizarTablaProductos();
-      
-      // Reseteamos el selector al estado inicial por defecto ("-- Seleccione un producto --")
-      document.getElementById('idProducto').value = '';
-      document.getElementById('cantidadProducto').value = 1;
-      if (window.ui && ui.showToast) ui.showToast('Producto agregado al carrito', 'success');
-    } else {
-      if (window.ui && ui.showToast) ui.showToast('Producto no encontrado', 'warning');
-    }
+    const i = e.target.dataset.i;
+    productosEnVenta.splice(i, 1);
+    renderProductos();
   });
 
-  /**
-   * Eliminar producto de la lista.
-   */
-  listaProductosVenta.addEventListener('click', function (e) {
-    const btn = e.target.closest('.btn-delete');
-    if (btn) {
-      const idx = parseInt(btn.dataset.index);
-      productosEnVenta.splice(idx, 1);
-      actualizarTablaProductos();
-      if (window.ui && ui.showToast) ui.showToast('Producto eliminado de la venta', 'info');
-    }
-  });
-
-  /**
-   * Mostrar formulario para crear nueva venta.
-   */
-  btnNuevaVenta.addEventListener('click', function () {
-    formularioVenta.style.display = 'block';
-    editingId = null;
-    productosEnVenta = [];
-    actualizarTablaProductos();
-    formularioVenta.classList.remove('editing');
-    const submitBtn = formVenta.querySelector('button[type="submit"]');
-    if (submitBtn) { submitBtn.textContent = 'Guardar'; submitBtn.classList.remove('update'); }
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('fechaVenta').value = today;
-    document.getElementById('clienteVenta').value = '';
-    document.getElementById('idCliente').value = '';
-    document.getElementById('idProducto').value = ''; // Limpiar select
-  });
-
-  /**
-   * Cancelar formulario.
-   */
-  cancelarVenta.addEventListener('click', function () {
-    editingId = null;
-    productosEnVenta = [];
-    formularioVenta.classList.remove('editing');
-    const submitBtn = formVenta.querySelector('button[type="submit"]');
-    if (submitBtn) { submitBtn.textContent = 'Guardar'; submitBtn.classList.remove('update'); }
-    formVenta.reset();
-    formularioVenta.style.display = 'none';
-    actualizarTablaProductos();
-  });
-
-
-
-  // =====================================
-// MOSTRAR NUEVO CLIENTE
-// =====================================
-
-btnNuevoCliente.addEventListener(
-  'click',
-  function () {
-
-    nuevoClienteBox.style.display =
-      'block';
-  }
-);
-
-// =====================================
-// GUARDAR NUEVO CLIENTE
-// =====================================
-
-guardarNuevoCliente.addEventListener(
-  'click',
-  async function () {
-
-    const nombre =
-      document.getElementById(
-        'nuevoNombre'
-      ).value.trim();
-
-    const email =
-      document.getElementById(
-        'nuevoEmail'
-      ).value.trim();
-
-    const telefono =
-      document.getElementById(
-        'nuevoTelefono'
-      ).value.trim();
-
-    if (
-      !nombre ||
-      !email
-    ) {
-
-      alert(
-        'Complete datos cliente'
-      );
-
-      return;
-    }
-
-    const nuevoCliente = {
-
-      id: Date.now(),
-
-      nombre,
-
-      email,
-
-      telefono,
-
-      fecha:
-        new Date()
-        .toISOString()
-        .split('T')[0],
-
-      pedidos: 0,
-
-      comprado: 0
-    };
-
-    try {
-
-      const res =
-        await fetch(
-          '/api/clientes',
-          {
-
-            method:'POST',
-
-            headers:{
-              'Content-Type':
-                'application/json'
-            },
-
-            body: JSON.stringify(
-              nuevoCliente
-            )
-          }
-        );
-
-      const data =
-        await res.json();
-
-      if (data.success) {
-
-        clientes.push(
-          nuevoCliente
-        );
-
-        document.getElementById(
-          'idCliente'
-        ).value =
-          nuevoCliente.id;
-
-        clienteVentaInput.value =
-          nombre;
-
-        telefonoClienteInput.value =
-          telefono;
-
-        emailClienteInput.value =
-          email;
-
-        nuevoClienteBox.style.display =
-          'none';
-
-        alert(
-          'Cliente registrado'
-        );
-
-      } else {
-
-        alert(
-          data.message
-        );
-      }
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        'Error guardando cliente'
-      );
-    }
-  }
-);
-  /**
-   * Guardar venta (crear o actualizar).
-   */
-
-  
-  formVenta.addEventListener('submit', async function (e) {
+  // =========================
+  // GUARDAR VENTA
+  // =========================
+  formVenta.addEventListener('submit', async (e) => {
     e.preventDefault();
-    console.debug('ModuloVentas: submit detectado');
-    if (productosEnVenta.length === 0) {
-      if (window.ui && ui.showToast) ui.showToast('Debe agregar al menos un producto', 'warning');
-      return;
-    }
-    const cliente = document.getElementById('clienteVenta').value.trim();
-    const fecha = document.getElementById('fechaVenta').value;
-    const estado = document.getElementById('estadoVenta').value;
-    const total = parseFloat(document.getElementById('totalVenta').value) || 0;
-    const admin = document.getElementById('adminVenta').value.trim();
-    const descripcion = productosEnVenta.map(p => `${p.nombre} (x${p.cantidad})`).join(', ');
-    const sale = {
+
+    if (productosEnVenta.length === 0) return;
+
+    const venta = {
       id: editingId || Date.now(),
-      cliente,
-      fecha,
-      estado,
-      total,
-      descripcion,
-      admin,
+      cliente: clienteVentaInput.value,
+      idCliente: idClienteInput.value,
+      fecha: document.getElementById('fechaVenta').value,
+      estado: document.getElementById('estadoVenta').value,
+      admin: document.getElementById('adminVenta').value,
+      total: Number(document.getElementById('totalVenta').value),
       productos: productosEnVenta
     };
 
     const url = editingId ? `/api/ventas/${editingId}` : '/api/ventas';
     const method = editingId ? 'PUT' : 'POST';
 
-    try {
-      const res = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sale)
-      });
-      if (res.ok) {
-        if (window.ui && ui.showToast) ui.showToast(editingId ? 'Venta actualizada' : 'Venta guardada', 'success');
-        loadSales();
-        productosEnVenta = [];
-        actualizarTablaProductos();
-        formVenta.reset();
-        formularioVenta.style.display = 'none';
-        editingId = null;
-        formularioVenta.classList.remove('editing');
-        const submitBtn = formVenta.querySelector('button[type="submit"]');
-        if (submitBtn) { submitBtn.textContent = 'Guardar'; submitBtn.classList.remove('update'); }
-      } else {
-        if (window.ui && ui.showToast) ui.showToast('Error al guardar', 'error');
-      }
-    } catch (err) {
-      console.error('ModuloVentas: error al guardar venta:', err);
-      if (window.ui && ui.showToast) ui.showToast('Error de conexión', 'error');
-    }
+    await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(venta)
+    });
+
+    productosEnVenta = [];
+    formVenta.reset();
+    formularioVenta.style.display = 'none';
+
+    loadSales();
   });
 
-  /**
-   * Delegación de eventos para editar, ver detalle y eliminar ventas.
-   */
-  tablaBody.addEventListener('click', async function (e) {
-    const btnEdit = e.target.closest('.btn-edit');
-    const btnDelete = e.target.closest('.btn-delete');
-    const btnDetail = e.target.closest('.btn-detail');
-
-    if (btnDetail) {
-      const row = btnDetail.closest('tr');
-      const id = row.dataset.id;
-      const venta = salesData.find(v => v.id == id);
-      if (venta) {
-        showDetail(venta);
-      }
-    }
-
-    if (btnEdit) {
-      const row = btnEdit.closest('tr');
-      const id = row.dataset.id;
-      const venta = salesData.find(v => v.id == id);
-      if (venta) {
-        console.log('Editando venta:', venta);
-        editingId = venta.id;
-
-        // Poblar formulario
-        document.getElementById('clienteVenta').value = venta.cliente;
-        const clienteObj = clientes.find(c => c.nombre === venta.cliente);
-        if (clienteObj) document.getElementById('idCliente').value = clienteObj.id;
-
-        document.getElementById('fechaVenta').value = venta.fecha.split('T')[0];
-        document.getElementById('estadoVenta').value = venta.estado;
-        document.getElementById('adminVenta').value = venta.admin;
-
-        // Poblar productos
-        productosEnVenta = venta.productos || [];
-        actualizarTablaProductos();
-
-        // Mostrar formulario en modo edición
-        formularioVenta.style.display = 'block';
-        formularioVenta.classList.add('editing');
-        const submitBtn = formVenta.querySelector('button[type="submit"]');
-        if (submitBtn) { submitBtn.textContent = 'Actualizar'; submitBtn.classList.add('update'); }
-
-        window.scrollTo(0, 0);
-      }
-    }
-
-    if (btnDelete) {
-      const row = btnDelete.closest('tr');
-      const id = row.dataset.id;
-      if (window.ui && ui.confirmAction) {
-        const confirmed = await ui.confirmAction('¿Eliminar esta venta?');
-        if (confirmed) {
-          console.log('Eliminar venta:', id);
-          if (window.ui && ui.showToast) ui.showToast('Función de eliminación en desarrollo', 'info');
-        }
-      } else {
-        if (confirm('¿Está seguro de eliminar esta venta?')) {
-          console.log('Eliminar venta:', id);
-          if (window.ui && ui.showToast) ui.showToast('Función de eliminación en desarrollo', 'info');
-        }
-      }
-    }
-  });
+  // =========================
+  // INIT
+  // =========================
+  loadSales();
+  loadData();
 });

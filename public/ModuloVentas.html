@@ -32,98 +32,144 @@
       </div>
 
       <!-- Módulo de ventas -->
-   
-<section id="ventas" class="productos-section">
+      <section id="ventas" class="productos-section">
+        <div class="productos-header">
+          <h2>Ventas</h2>
+          <button id="btnNuevaVenta" class="nuevo-btn">NUEVA VENTA +</button>
+        </div>
 
-  <div class="productos-header">
-    <h2>Ventas</h2>
-    <button id="btnNuevaVenta" class="nuevo-btn">NUEVA VENTA +</button>
-  </div>
+        <!-- Formulario para nueva venta -->
+        <div id="formularioVenta" class="formulario-container" style="display: none;">
+          <h3>Registrar nueva venta</h3>
+          <form id="formVenta">
+            <label for="idCliente">ID Cliente:</label>
+            <input type="text" id="idCliente" placeholder="Ingrese ID y presione Tab" />
 
-  <!-- FORMULARIO -->
-  <div id="formularioVenta" class="formulario-container" style="display: none;">
+            <label for="clienteVenta">Cliente:</label>
+            <input type="text" id="clienteVenta" required readonly />
 
-    <h3>Registrar nueva venta</h3>
+            <label for="fechaVenta">Fecha:</label>
+            <input type="date" id="fechaVenta" required />
 
-    <form id="formVenta">
+            <label for="estadoVenta">Estado:</label>
+            <select id="estadoVenta" required>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Pagado">Pagado</option>
+              <option value="Cancelado">Cancelado</option>
+            </select>
 
-      <!-- CLIENTE -->
-      <label>Cliente:</label>
-      <input type="text" id="clienteVenta" placeholder="Nombre cliente" />
+            <hr style="margin: 15px 0; border: 1px solid #ddd;">
+            
+            <h4 style="margin-bottom: 10px;">Agregar Productos</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px;">
+              <div>
+                <label for="idProducto">ID Producto:</label>
+                <input type="text" id="idProducto" placeholder="Ingrese ID" />
+              </div>
+              <div>
+                <label for="cantidadProducto">Cantidad:</label>
+                <input type="number" id="cantidadProducto" value="1" min="1" />
+              </div>
+              <button type="button" id="btnAgregarProducto" class="nuevo-btn" style="margin: 0; height: 40px;">+ Agregar</button>
+            </div>
 
-      <!-- FECHA -->
-      <label>Fecha:</label>
-      <input type="date" id="fechaVenta" />
+            <!-- Tabla de productos agregados -->
+            <div id="productosAgregados" style="margin-bottom: 15px; display: none;">
+              <label>Productos en esta venta:</label>
+              <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
+                <thead>
+                  <tr style="background: #f0f0f0;">
+                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Producto</th>
+                    <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Cant.</th>
+                    <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Precio Unit.</th>
+                    <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Subtotal</th>
+                    <th style="padding: 8px; text-align: center; border: 1px solid #ddd; width: 80px;">Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="listaProductosVenta"></tbody>
+              </table>
+            </div>
 
-      <!-- ESTADO -->
-      <label>Estado:</label>
-      <select id="estadoVenta">
-        <option>Pendiente</option>
-        <option>Pagado</option>
-        <option>Cancelado</option>
-      </select>
+            <label for="totalVenta">Total:</label>
+            <input type="number" id="totalVenta" value="0" required readonly style="font-weight: bold; font-size: 1.1em;" />
 
-      <hr>
+            <label for="adminVenta">Administrador:</label>
+            <input type="text" id="adminVenta" value="Pepito Perez" required />
 
-      <h4>Agregar Productos</h4>
+            <button type="submit">Guardar</button>
+            <button type="button" id="cancelarVenta">Cancelar</button>
+          </form>
+        </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;">
+        <!-- Filtro de búsqueda -->
+        <div class="filter-container">
+          <input type="text" id="filtroVentas" placeholder="🔍 Buscar ventas..." style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;" />
+        </div>
 
-        <!-- PRODUCTO ID -->
-        <input type="text" id="idProducto" placeholder="ID producto">
-
-        <!-- CANTIDAD -->
-        <input type="number" id="cantidadProducto" value="1" min="1">
-
-        <!-- BOTÓN -->
-        <button type="button" id="btnAgregarProducto" class="nuevo-btn">
-          Agregar
-        </button>
-
-      </div>
-
-      <!-- TABLA CARRITO -->
-      <div style="margin-top:15px;">
-        <table style="width:100%">
+        <!-- Tabla de ventas -->
+        <table id="tablaVentas">
           <thead>
             <tr>
-              <th>Producto</th>
-              <th>Cant</th>
-              <th>Precio</th>
-              <th>Subtotal</th>
-              <th></th>
+              <th>Id Pedido</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Total</th>
+              <th>Productos</th>
+              <th>Administrador</th>
+              <th>Acciones</th>
             </tr>
           </thead>
-
-          <tbody id="listaProductosVenta"></tbody>
+          <tbody>
+            <!-- Las filas se agregarán dinámicamente -->
+          </tbody>
         </table>
-      </div>
+        <div id="paginationVentas" class="pagination-container"></div>
 
-      <!-- TOTAL -->
-      <label>Total:</label>
-      <input type="number" id="totalVenta" readonly value="0">
+        <!-- Modal de Detalle de Venta -->
+        <div id="modalDetalleVenta" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+          <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+              <h2 style="margin: 0;">Detalle de Venta #<span id="detalleId"></span></h2>
+              <span class="close-modal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                <p><strong>Cliente:</strong> <span id="detalleCliente"></span></p>
+                <p><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
+                <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+              </div>
+              <div>
+                <p><strong>Administrador:</strong> <span id="detalleAdmin"></span></p>
+                <p><strong>Total:</strong> <span id="detalleTotal" style="font-size: 1.2em; font-weight: bold;"></span></p>
+              </div>
+            </div>
 
-      <!-- ADMIN -->
-      <label>Administrador:</label>
-      <input type="text" id="adminVenta" value="Pepito Perez">
-
-      <button type="submit">Guardar Venta</button>
-      <button type="button" id="cancelarVenta">Cancelar</button>
-
-    </form>
+            <h3>Productos</h3>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <thead>
+                <tr style="background: #f0f0f0;">
+                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Producto</th>
+                  <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Cantidad</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Precio Unit.</th>
+                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="detalleProductosBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
-  <!-- TABLA VENTAS -->
-  <table id="tablaVentas">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Cliente</th>
-        <th>Fecha</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-</section>
+  <!-- Llamado al archivo JS externo -->
+  <script src="assets/js/user-display.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/backend-check.js"></script>
+  <script src="assets/js/pagination.js"></script>
+<script src="assets/js/ModuloVentas.js"></script>
+</body>
+</html>

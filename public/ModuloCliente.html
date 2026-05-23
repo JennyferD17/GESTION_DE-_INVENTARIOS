@@ -39,27 +39,40 @@
         </div>
 
         <!-- Formulario para nuevo cliente -->
-        <div id="formularioCliente" class="formulario-container" style="display: none;">
-          <h3>Registrar nuevo cliente</h3>
-          <form id="formCliente">
-            <label for="nombreCliente">Nombre:</label>
-            <input type="text" id="nombreCliente" required />
+        <form id="formCliente">
 
-            <label for="emailCliente">Email:</label>
-            <input type="email" id="emailCliente" required />
+  <label for="nombreCliente">Nombre:</label>
+  <input type="text" id="nombreCliente" required />
 
-            <label for="telefonoCliente">Teléfono:</label>
-            <input type="text" id="telefonoCliente" required />
+  <label for="emailCliente">Email:</label>
+  <input type="email" id="emailCliente" required />
 
-            <label for="fechaRegistro">Fecha Registro:</label>
-            <input type="date" id="fechaRegistro" required />
+  <label for="telefonoCliente">Teléfono:</label>
+  <input type="text" id="telefonoCliente" required />
 
-            
-            <button type="submit">Guardar</button>
-            <button type="button" id="cancelarCliente">Cancelar</button>
-          </form>
-        </div>
+  <label for="fechaRegistro">Fecha Registro:</label>
+  <input type="date" id="fechaRegistro" required />
 
+  <!-- 🪪 TIPO DE DOCUMENTO -->
+  <label for="tipoDocumento">Tipo de documento:</label>
+  <select id="tipoDocumento" required>
+    <option value="">Seleccione</option>
+    <option value="CC">Cédula de ciudadanía</option>
+    <option value="NIT">NIT</option>
+    <option value="CE">Cédula de extranjería</option>
+    <option value="PEP">PEP</option>
+    <option value="PPT">PPT</option>
+    <option value="PAS">Pasaporte</option>
+  </select>
+
+  <!-- 🧾 NÚMERO DE DOCUMENTO -->
+  <label for="numeroDocumento">Número de documento:</label>
+  <input type="text" id="numeroDocumento" required />
+
+  <button type="submit">Guardar</button>
+  <button type="button" id="cancelarCliente">Cancelar</button>
+
+</form>
         <!-- Filtro de búsqueda -->
         <div class="filter-container">
           <input type="text" id="filtroClientes" placeholder="🔍 Buscar clientes..." style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;" />

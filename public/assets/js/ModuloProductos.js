@@ -147,20 +147,41 @@ document.addEventListener('DOMContentLoaded', function () {
       estado
     };
 
-    try {
-      const res = await fetch('/api/productos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(producto)
-      });
-      const data = await res.json();
-      console.log('Respuesta del servidor:', data);
-      if (window.ui && ui.showToast) ui.showToast('Producto guardado', 'success');
-      loadProducts(); // Recargar con paginación
-    } catch (err) {
-      console.error('Error al guardar producto en el servidor:', err);
-      if (window.ui && ui.showToast) ui.showToast('Error al guardar', 'error');
+  try {
+
+  const res = await fetch('/api/productos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(producto)
+  });
+
+  const data = await res.json();
+
+  console.log('Respuesta del servidor:', data);
+
+  if (data.success) {
+
+    if (window.ui && ui.showToast) {
+      ui.showToast('Producto guardado', 'success');
     }
+
+    loadProducts();
+
+  } else {
+
+    if (window.ui && ui.showToast) {
+      ui.showToast(data.message, 'warning');
+    }
+  }
+
+} catch (err) {
+
+  console.error('Error al guardar producto en el servidor:', err);
+
+  if (window.ui && ui.showToast) {
+    ui.showToast('Error al guardar', 'error');
+  }
+}
 
     formProducto.reset();
     formulario.style.display = 'none';

@@ -203,6 +203,24 @@ app.get('/api/productos', async (req, res) => {
   }
 });
 
+/**
+ * POST /api/productos
+ * Guarda o actualiza productos
+ */
+app.post('/api/productos', async (req, res) => {
+
+  try {
+
+    const producto = req.body;
+
+    if (!producto || !producto.nombre) {
+
+      return res.status(400).json({
+        success: false,
+        message: 'Datos incompletos'
+      });
+    }
+
     // =========================
     // PRODUCTOS
     // =========================
@@ -220,7 +238,7 @@ app.get('/api/productos', async (req, res) => {
     );
 
     // =========================
-    // GUARDAR PROVEEDOR SI NO EXISTE
+    // VALIDAR SI EL PROVEEDOR EXISTE
     // =========================
     const proveedorExiste =
       proveedoresData.proveedores.find(
@@ -229,20 +247,15 @@ app.get('/api/productos', async (req, res) => {
           producto.proveedor.toLowerCase()
       );
 
+    // =========================
+    // SI NO EXISTE -> ERROR
+    // =========================
     if (!proveedorExiste) {
 
-      proveedoresData.proveedores.push({
-        id: Date.now(),
-        nombre: producto.proveedor,
-        createdAt: new Date().toISOString()
+      return res.status(400).json({
+        success: false,
+        message: 'El proveedor no existe'
       });
-
-      await writeFile(
-        PROVEEDORES_FILE,
-        proveedoresData
-      );
-
-      console.log('Proveedor agregado automáticamente');
     }
 
     // =========================
@@ -289,6 +302,7 @@ app.get('/api/productos', async (req, res) => {
     });
   }
 });
+
 // ============================================
 // ENDPOINTS DE LA API - CLIENTES
 // ============================================

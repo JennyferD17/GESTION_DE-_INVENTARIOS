@@ -75,7 +75,22 @@ async function readFile(filePath, defaultContent) {
  * @returns {Promise<void>}
  */
 async function writeFile(filePath, data) {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+
+    await fs.writeFile(
+      filePath,
+      JSON.stringify(data, null, 2),
+      'utf8'
+    );
+
+    console.log(`Archivo guardado: ${filePath}`);
+
+  } catch (error) {
+    console.error('ERROR ESCRIBIENDO ARCHIVO:', error);
+    throw error;
+  }
+}
 }
 
 // ============================================
@@ -166,18 +181,9 @@ app.get('/api/users', async (req, res) => {
  * GET /api/productos
  * Obtiene la lista completa de productos
  */
-app.get('/api/productos', async (req, res) => {
-  const data = await readFile(PRODUCTOS_FILE, { productos: [] });
-  res.json(data.productos);
-});
-
-/**
- * POST /api/productos
- * Agrega un nuevo producto al inventario
- * Genera un ID automático si no se proporciona
- */
 app.post('/api/productos', async (req, res) => {
   try {
+
     const producto = req.body;
 
     if (!producto || !producto.nombre) {
@@ -187,35 +193,89 @@ app.post('/api/productos', async (req, res) => {
       });
     }
 
-    const data = await readFile(PRODUCTOS_FILE, { productos: [] });
-
-    // Buscar si ya existe
-    const index = data.productos.findIndex(
-      p => p.id == producto.id
+    // =========================
+    // PRODUCTOS
+    // =========================
+    const productosData = await readFile(
+      PRODUCTOS_FILE,
+      { productos: [] }
     );
 
-    if (index !== -1) {
-      // ACTUALIZAR
-      data.productos[index] = producto;
-    } else {
-      // CREAR
-      producto.id = producto.id || Date.now();
-      data.productos.push(producto);
+    // =========================
+    // PROVEEDORES
+    // =========================
+    const proveedoresData = await readFile(
+      PROVEEDORES_FILE,
+      { proveedores: [] }
+    );
+
+    // =========================
+    // GUARDAR PROVEEDOR SI NO EXISTE
+    // =========================
+    const proveedorExiste =
+      proveedoresData.proveedores.find(
+        p =>
+          p.nombre.toLowerCase() ===
+          producto.proveedor.toLowerCase()
+      );
+
+    if (!proveedorExiste) {
+
+      proveedoresData.proveedores.push({
+        id: Date.now(),
+        nombre: producto.proveedor,
+        createdAt: new Date().toISOString()
+      });
+
+      await writeFile(
+        PROVEEDORES_FILE,
+        proveedoresData
+      );
+
+      console.log('Proveedor agregado automáticamente');
     }
 
-    await writeFile(PRODUCTOS_FILE, data);
+    // =========================
+    // CREAR O ACTUALIZAR PRODUCTO
+    // =========================
+    const index =
+      productosData.productos.findIndex(
+        p => p.id == producto.id
+      );
 
-    res.json({
+    if (index !== -1) {
+
+      productosData.productos[index] = producto;
+
+    } else {
+
+      producto.id = Date.now();
+
+      productosData.productos.push(producto);
+    }
+
+    // =========================
+    // GUARDAR PRODUCTOS
+    // =========================
+    await writeFile(
+      PRODUCTOS_FILE,
+      productosData
+    );
+
+    console.log('Producto guardado correctamente');
+
+    return res.json({
       success: true,
-      message: 'Producto guardado correctamente'
+      message: 'Producto guardado'
     });
 
   } catch (error) {
-    console.error(error);
 
-    res.status(500).json({
+    console.error('ERROR PRODUCTOS:', error);
+
+    return res.status(500).json({
       success: false,
-      message: 'Error interno'
+      message: 'Error guardando producto'
     });
   }
 });

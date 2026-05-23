@@ -591,19 +591,48 @@ app.post('/api/proveedores', async (req, res) => {
 });
 
 // ============================================
-// VENTAS
+// VENTAS (CORREGIDO Y COMPLETADO)
 // ============================================
 
 app.get('/api/ventas', async (req, res) => {
-
-  const data = await readFile(
-    VENTAS_FILE,
-    { ventas: [] }
-  );
-
+  const data = await readFile(VENTAS_FILE, { ventas: [] });
   res.json(data.ventas || []);
 });
 
+app.post('/api/ventas', async (req, res) => {
+  try {
+    const nuevaVenta = req.body;
+
+    if (!nuevaVenta || !nuevaVenta.cliente || nuevaVenta.productos.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Datos de venta incompletos o carrito vacío'
+      });
+    }
+
+    const data = await readFile(VENTAS_FILE, { ventas: [] });
+    
+    if (!Array.isArray(data.ventas)) {
+      data.ventas = [];
+    }
+
+    // Guardamos la venta con la estructura correcta del JSON
+    data.ventas.push(nuevaVenta);
+    await writeFile(VENTAS_FILE, data);
+
+    res.json({
+      success: true,
+      message: 'Venta registrada con éxito'
+    });
+
+  } catch (error) {
+    console.error('ERROR AL GUARDAR VENTA:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error interno al procesar la venta'
+    });
+  }
+});
 // ============================================
 // ARCHIVOS ESTÁTICOS
 // ============================================

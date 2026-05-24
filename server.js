@@ -159,50 +159,37 @@ app.get('/api/ventas', async (req, res) => {
 
 app.post('/api/ventas', async (req, res) => {
   try {
-    const nuevaVenta = req.body;
+    const venta = req.body;
 
-    if (!nuevaVenta.idCliente || !nuevaVenta.productos?.length) {
+    if (!venta.idCliente || !venta.productos?.length) {
       return res.status(400).json({
         success: false,
-        message: 'Datos de venta incompletos'
+        message: 'Datos incompletos'
       });
     }
 
-    const dataVentas = await readFile(VENTAS_FILE, { ventas: [] });
+    const data = await readFile(VENTAS_FILE, { ventas: [] });
 
-    nuevaVenta.id = Date.now();
-    dataVentas.ventas.push(nuevaVenta);
+    venta.id = Date.now();
+    data.ventas.push(venta);
 
-    await writeFile(VENTAS_FILE, dataVentas);
+    await writeFile(VENTAS_FILE, data);
 
-    // 🔥 ACTUALIZAR CLIENTE POR ID
-    const dataClientes = await readFile(CLIENTES_FILE, { clientes: [] });
+    // actualizar cliente
+    const clientes = await readFile(CLIENTES_FILE, { clientes: [] });
 
-    const index = dataClientes.clientes.findIndex(
-      c => c.idCliente === nuevaVenta.idCliente
-    );
+    const c = clientes.clientes.find(x => x.idCliente === venta.idCliente);
 
-    if (index !== -1) {
-      dataClientes.clientes[index].pedidos =
-        (dataClientes.clientes[index].pedidos || 0) + 1;
-
-      dataClientes.clientes[index].comprado =
-        (dataClientes.clientes[index].comprado || 0) + nuevaVenta.total;
-
-      await writeFile(CLIENTES_FILE, dataClientes);
+    if (c) {
+      c.pedidos = (c.pedidos || 0) + 1;
+      c.comprado = (c.comprado || 0) + venta.total;
+      await writeFile(CLIENTES_FILE, clientes);
     }
 
-    res.json({
-      success: true,
-      message: 'Venta registrada'
-    });
+    res.json({ success: true });
 
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      success: false,
-      message: 'Error ventas'
-    });
+  } catch (e) {
+    res.status(500).json({ success: false });
   }
 });
 

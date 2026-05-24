@@ -1,155 +1,111 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-  const formVenta = document.getElementById('formVenta');
-  const btnNuevaVenta = document.getElementById('btnNuevaVenta');
-  const cancelarVenta = document.getElementById('cancelarVenta');
+  const form = document.getElementById('formVenta');
+  const btnNueva = document.getElementById('btnNuevaVenta');
+  const cancelar = document.getElementById('cancelarVenta');
 
-  const idClienteInput = document.getElementById('idCliente');
-  const clienteInput = document.getElementById('clienteVenta');
-  const adminInput = document.getElementById('adminVenta');
+  const idCliente = document.getElementById('idCliente');
+  const cliente = document.getElementById('clienteVenta');
+  const admin = document.getElementById('adminVenta');
 
-  const selectProducto = document.getElementById('idProducto');
-  const cantidadInput = document.getElementById('cantidadProducto');
+  const select = document.getElementById('idProducto');
+  const cantidad = document.getElementById('cantidadProducto');
 
-  const tablaProductos = document.getElementById('listaProductosVenta');
-  const totalInput = document.getElementById('totalVenta');
+  const tabla = document.getElementById('listaProductosVenta');
+  const total = document.getElementById('totalVenta');
 
   let productos = [];
   let clientes = [];
   let carrito = [];
 
-  // ==============================
-  // 🔐 USUARIO EN SESIÓN
-  // ==============================
-  const usuario = JSON.parse(localStorage.getItem('usuarioActivo') || '{}');
-  adminInput.value = usuario.nombre || 'Invitado';
-  document.getElementById('topbarUser').textContent = usuario.nombre || 'Invitado';
+  // usuario sesión
+  const user = JSON.parse(localStorage.getItem('usuarioActivo') || '{}');
+  admin.value = user.nombre || 'Admin';
+  document.getElementById('topbarUser').textContent = user.nombre || 'Invitado';
 
-  // ==============================
-  // CARGAR DATOS
-  // ==============================
-  async function loadData() {
-    const [pRes, cRes] = await Promise.all([
+  // cargar datos
+  async function load() {
+    const [p, c] = await Promise.all([
       fetch('/api/productos'),
       fetch('/api/clientes')
     ]);
 
-    productos = await pRes.json();
-    clientes = await cRes.json();
+    productos = await p.json();
+    clientes = await c.json();
 
-    selectProducto.innerHTML = `<option value="">-- Seleccione --</option>`;
+    select.innerHTML = '<option value="">-- Seleccione --</option>';
     productos.forEach(p => {
-      selectProducto.innerHTML += `
-        <option value="${p.id}">
-          ${p.nombre} - $${Number(p.precio).toLocaleString('es-CO')}
-        </option>`;
+      select.innerHTML += `<option value="${p.id}">${p.nombre}</option>`;
     });
   }
 
-  loadData();
+  load();
 
-  // ==============================
-  // 🔎 AUTOCOMPLETE CLIENTE
-  // ==============================
-  idClienteInput.addEventListener('blur', async () => {
-    const id = idClienteInput.value.trim();
-    if (!id) return;
-
-    const res = await fetch(`/api/clientes/${id}`);
-    if (!res.ok) {
-      clienteInput.value = '';
-
-      if (confirm('Cliente no existe. ¿Desea crearlo?')) {
-        window.location.href = `ModuloCliente.html?nuevoId=${id}`;
+  // cliente
+  idCliente.addEventListener('blur', () => {
+    const c = clientes.find(x => x.idCliente == idCliente.value);
+    if (c) cliente.value = c.nombre;
+    else if (idCliente.value) {
+      if (confirm('Cliente no existe, crear?')) {
+        window.location.href = `ModuloCliente.html?nuevoId=${idCliente.value}`;
       }
-      return;
     }
-
-    const cliente = await res.json();
-    clienteInput.value = cliente.nombre;
   });
 
-  // ==============================
-  // 🛒 AGREGAR PRODUCTO
-  // ==============================
-  document.getElementById('btnAgregarProducto').addEventListener('click', () => {
+  // agregar producto
+  document.getElementById('btnAgregarProducto').onclick = () => {
+    const id = select.value;
+    const cant = parseInt(cantidad.value || 1);
 
-    const id = selectProducto.value;
-    const cantidad = parseInt(cantidadInput.value || 1);
+    const p = productos.find(x => x.id == id);
+    if (!p) return;
 
-    if (!id) return alert('Seleccione producto');
+    const ex = carrito.find(x => x.id == id);
 
-    const prod = productos.find(p => p.id == id);
-    if (!prod) return;
+    if (ex) ex.cantidad += cant;
+    else carrito.push({ id: p.id, nombre: p.nombre, precio: p.precio, cantidad: cant });
 
-    const item = carrito.find(p => p.id == id);
+    render();
+  };
 
-    if (item) {
-      item.cantidad += cantidad;
-    } else {
-      carrito.push({
-        id: prod.id,
-        nombre: prod.nombre,
-        precio: Number(prod.precio),
-        cantidad
-      });
-    }
-
-    renderCarrito();
-
-    selectProducto.value = '';
-    cantidadInput.value = 1;
-  });
-
-  // ==============================
-  // 🧾 RENDER CARRITO
-  // ==============================
-  function renderCarrito() {
-    tablaProductos.innerHTML = '';
-    let total = 0;
+  function render() {
+    tabla.innerHTML = '';
+    let t = 0;
 
     carrito.forEach((p, i) => {
       const sub = p.precio * p.cantidad;
-      total += sub;
+      t += sub;
 
-      tablaProductos.innerHTML += `
+      tabla.innerHTML += `
         <tr>
           <td>${p.nombre}</td>
-          <td style="text-align:center">${p.cantidad}</td>
-          <td style="text-align:right">${p.precio.toLocaleString('es-CO')}</td>
-          <td style="text-align:right">${sub.toLocaleString('es-CO')}</td>
-          <td>
-            <button type="button" onclick="removeItem(${i})">🗑️</button>
-          </td>
+          <td>${p.cantidad}</td>
+          <td>${p.precio}</td>
+          <td>${sub}</td>
+          <td><button onclick="del(${i})">🗑️</button></td>
         </tr>
       `;
     });
 
-    totalInput.value = total;
+    total.value = t;
   }
 
-  window.removeItem = (i) => {
+  window.del = (i) => {
     carrito.splice(i, 1);
-    renderCarrito();
+    render();
   };
 
-  // ==============================
-  // 💾 GUARDAR VENTA
-  // ==============================
-  formVenta.addEventListener('submit', async (e) => {
+  // guardar
+  form.onsubmit = async (e) => {
     e.preventDefault();
 
-    if (!carrito.length) {
-      return alert('Agrega productos');
-    }
-
     const venta = {
-      idCliente: idClienteInput.value,
-      cliente: clienteInput.value,
+      idCliente: idCliente.value,
+      cliente: cliente.value,
       fecha: document.getElementById('fechaVenta').value,
       estado: document.getElementById('estadoVenta').value,
-      total: Number(totalInput.value),
-      admin: adminInput.value,
+      total: Number(total.value),
+      admin: admin.value,
       productos: carrito
     };
 
@@ -160,33 +116,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (!res.ok) {
-      alert('Error al guardar venta');
-      return;
+      const msg = await res.json();
+      return alert(msg.message || 'Error');
     }
 
-    alert('Venta registrada correctamente');
+    alert('Venta guardada');
 
     carrito = [];
-    renderCarrito();
-    formVenta.reset();
+    render();
+    form.reset();
+    admin.value = user.nombre;
+  };
 
-    adminInput.value = usuario.nombre || 'Invitado';
-  });
-
-  // ==============================
-  // CANCELAR
-  // ==============================
-  cancelarVenta.addEventListener('click', () => {
-    carrito = [];
-    renderCarrito();
-    formVenta.reset();
-  });
-
-  // ==============================
-  // NUEVA VENTA
-  // ==============================
-  btnNuevaVenta.addEventListener('click', () => {
+  btnNueva.onclick = () => {
     document.getElementById('formularioVenta').style.display = 'block';
-  });
+  };
+
+  cancelar.onclick = () => {
+    carrito = [];
+    render();
+    form.reset();
+  };
 
 });

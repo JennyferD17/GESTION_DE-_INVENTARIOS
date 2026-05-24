@@ -44,49 +44,90 @@ document.addEventListener('DOMContentLoaded', () => {
   load();
 
   // =========================
-  // CLIENTE (SIN REDIRECCIÓN)
+// CLIENTE
+// =========================
+
+idCliente.addEventListener('blur', async () => {
+
+  const id = idCliente.value.trim();
+
+  if (!id) return;
+
+  const res = await fetch(`/api/clientes/${id}`);
+
+  if (!res.ok) {
+
+    cliente.value = '';
+
+    document.getElementById('nuevoClienteBox').style.display = 'block';
+
+    document.getElementById('nuevoDoc').value = id;
+
+    return;
+  }
+
+  const data = await res.json();
+
+  cliente.value = data.nombre;
+
+  document.getElementById('nuevoClienteBox').style.display = 'none';
+});
+
   // =========================
-  idCliente.addEventListener('blur', async () => {
+// GUARDAR CLIENTE RÁPIDO
+// =========================
 
-    const id = idCliente.value.trim();
-    if (!id) return;
+document.getElementById('guardarClienteRapido').onclick = async () => {
 
-    const res = await fetch(`/api/clientes/${id}`);
+  const nuevo = {
 
-    if (!res.ok) {
-      cliente.value = '';
+    tipoDocumento: 'CC',
 
-      // 🔥 SOLO AVISAR, NO SALIR
-      if (confirm('Cliente no existe. ¿Desea crearlo ahora?')) {
+    numeroDocumento:
+      document.getElementById('nuevoDoc').value,
 
-        const nombre = prompt('Nombre del cliente:');
+    nombre:
+      document.getElementById('nuevoNombre').value,
 
-        if (nombre) {
-          const nuevo = {
-            idCliente: crypto.randomUUID(),
-            nombre,
-            pedidos: 0,
-            comprado: 0
-          };
+    email:
+      document.getElementById('nuevoEmail').value,
 
-          await fetch('/api/clientes', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevo)
-          });
+    telefono:
+      document.getElementById('nuevoTelefono').value,
 
-          clientes.push(nuevo);
-          cliente.value = nombre;
-        }
-      }
+    fecha:
+      new Date().toISOString().split('T')[0],
 
-      return;
-    }
+    pedidos: 0,
+    comprado: 0
+  };
 
-    const data = await res.json();
-    cliente.value = data.nombre;
+  const res = await fetch('/api/clientes', {
+
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify(nuevo)
   });
 
+  const data = await res.json();
+
+  if (!data.success) {
+    return alert('Error creando cliente');
+  }
+
+  cliente.value = nuevo.nombre;
+
+  idCliente.value = nuevo.numeroDocumento;
+
+  document.getElementById('nuevoClienteBox').style.display = 'none';
+
+  alert('Cliente creado');
+};
+  
   // =========================
   // AGREGAR PRODUCTO
   // =========================
@@ -184,4 +225,51 @@ document.addEventListener('DOMContentLoaded', () => {
     form.reset();
   };
 
+  // =========================
+// CARGAR TABLA VENTAS
+// =========================
+
+async function cargarVentas() {
+
+  const res = await fetch('/api/ventas');
+
+  const ventas = await res.json();
+
+  const tbody =
+    document.querySelector('#tablaVentas tbody');
+
+  tbody.innerHTML = '';
+
+  ventas.forEach(v => {
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${v.id || ''}</td>
+        <td>${v.cliente || ''}</td>
+        <td>${v.fecha || ''}</td>
+        <td>${v.estado || ''}</td>
+        <td>$${Number(v.total || 0).toLocaleString('es-CO')}</td>
+
+        <td>
+          ${
+            v.productos
+              ? v.productos.map(p =>
+                  `${p.nombre} x${p.cantidad}`
+                ).join(', ')
+              : (v.descripcion || '')
+          }
+        </td>
+
+        <td>${v.admin || ''}</td>
+
+        <td>
+          <button>✏️</button>
+          <button>🗑️</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+cargarVentas();
 });

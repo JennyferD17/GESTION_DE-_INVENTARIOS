@@ -2,27 +2,27 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ventas - Sistema Inventario</title>
-
-  <link rel="stylesheet" href="assets/css/style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestión de Inventarios - Ventas</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/pagination.css" />
 </head>
-
 <body>
-
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <ul>
-      <li><a href="Dashboard.html">Dashboard</a></li>
-      <li><a href="ModuloProductos.html">Productos</a></li>
-      <li><a class="active" href="ModuloVentas.html">Ventas</a></li>
-      <li><a href="ModuloCliente.html">Clientes</a></li>
-      <li><a href="ModuloProveedor.html">Proveedores</a></li>
-      <li><a href="Login.html">Salir</a></li>
-    </ul>
-  </aside>
+  <div class="layout">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+      <nav class="sidebar-menu">
+        <ul>
+          <li><a href="Dashboard.html" id="dashboardBtn">Dashboard</a></li>
+          <li><a href="ModuloProductos.html" id="productosBtn">Productos</a></li>
+          <li><a href="ModuloVentas.html" id="ventasBtn" class="active">Ventas</a></li>
+          <li><a href="ModuloCliente.html" id="clientesBtn">Clientes</a></li>
+          <li><a href="ModuloProveedor.html" id="proveedoresBtn">Proveedores</a></li>
+          <li><a href="ModuloReportes.html" id="reportesBtn">Reportes</a></li>
+          <li><a href="Login.html" id="logoutBtn">Cerrar Sesión</a></li>
+        </ul>
+      </nav>
+    </aside>
 
   <!-- MAIN -->
   <main class="dashboard-container">

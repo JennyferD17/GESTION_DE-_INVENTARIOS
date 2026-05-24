@@ -1,32 +1,81 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de Inventarios - Login</title>
+
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
+
 <body>
-  <div class="left-side">
-    <img src="assets/img/logo.jpg" alt="Logo Gestión de Inventarios" />
-  </div>
-  <div class="right-side">
-    <div class="login-box">
-      <h2>GESTOR DE INVENTARIOS</h2>
-      <h3>INICIO DE SESIÓN</h3>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Admin@correo.com" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" placeholder="Introduce tu contraseña" required />
-      </div>
-      <button id="loginBtn">Iniciar sesión</button>
-      <a id="registerLink" href="Registro.html">¿No tienes cuenta? Regístrate</a>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="main-content">
+
+    <!-- LOGO -->
+    <div class="left-side">
+
+      <img
+        src="assets/img/logo.jpg"
+        alt="Logo Gestión de Inventarios"
+      />
+
     </div>
-  </div>
+
+    <!-- LOGIN -->
+    <div class="right-side">
+
+      <div class="login-box">
+
+        <h2>GESTOR DE INVENTARIOS</h2>
+
+        <h3>INICIO DE SESIÓN</h3>
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            type="email"
+            id="email"
+            placeholder="Admin@correo.com"
+            required
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="password">
+            Contraseña
+          </label>
+
+          <input
+            type="password"
+            id="password"
+            placeholder="Introduce tu contraseña"
+            required
+          />
+
+        </div>
+
+        <button id="loginBtn">
+          Iniciar sesión
+        </button>
+
+        <a
+          id="registerLink"
+          href="Registro.html"
+        >
+          ¿No tienes cuenta? Regístrate
+        </a>
+
+      </div>
+
+    </div>
 
   <script src="assets/js/login.js"></script>
   <script src="assets/js/backend-check.js"></script>

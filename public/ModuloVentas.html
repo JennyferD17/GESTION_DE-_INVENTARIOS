@@ -2,180 +2,147 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestión de Inventarios - Ventas</title>
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <link rel="stylesheet" href="assets/css/pagination.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ventas - Sistema Inventario</title>
+
+  <link rel="stylesheet" href="assets/css/style.css"/>
 </head>
+
 <body>
-  <div class="layout">
-    <!-- Barra lateral -->
-    <aside class="sidebar">
-      <nav class="sidebar-menu">
-        <ul>
-          <li><a href="Dashboard.html" id="dashboardBtn">Dashboard</a></li>
-          <li><a href="ModuloProductos.html" id="productosBtn">Productos</a></li>
-          <li><a href="ModuloVentas.html" id="ventasBtn" class="active">Ventas</a></li>
-          <li><a href="ModuloCliente.html" id="clientesBtn">Clientes</a></li>
-          <li><a href="ModuloProveedor.html" id="proveedoresBtn">Proveedores</a></li>
-          <li><a href="ModuloReportes.html" id="reportesBtn">Reportes</a></li>
-          <li><a href="Login.html" id="logoutBtn">Cerrar Sesión</a></li>
-        </ul>
-      </nav>
-    </aside>
 
-    <!-- Contenido principal -->
-    <main class="dashboard-container">
-      <div class="topbar">
-        <h1 class="topbar-title">GESTIÓN DE INVENTARIOS</h1>
-        <span class="topbar-user">Usuario: <span id="topbarUser">Invitado</span></span>
-      </div>
+<div class="layout">
 
-      <!-- Módulo de ventas -->
-      <section id="ventas" class="productos-section">
-        <div class="productos-header">
-          <h2>Ventas</h2>
-          <button id="btnNuevaVenta" class="nuevo-btn">NUEVA VENTA +</button>
-        </div>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <ul>
+      <li><a href="Dashboard.html">Dashboard</a></li>
+      <li><a href="ModuloProductos.html">Productos</a></li>
+      <li><a class="active" href="ModuloVentas.html">Ventas</a></li>
+      <li><a href="ModuloCliente.html">Clientes</a></li>
+      <li><a href="ModuloProveedor.html">Proveedores</a></li>
+      <li><a href="Login.html">Salir</a></li>
+    </ul>
+  </aside>
 
-        <!-- Formulario para nueva venta -->
-        <div id="formularioVenta" class="formulario-container" style="display: none;">
-          <h3>Registrar nueva venta</h3>
-          <form id="formVenta">
-            <label for="idCliente">ID Cliente:</label>
-            <input type="text" id="idCliente" placeholder="Ingrese ID y presione Tab" />
+  <!-- MAIN -->
+  <main class="dashboard-container">
 
-            <label for="clienteVenta">Cliente:</label>
-            <input type="text" id="clienteVenta" required readonly />
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <h2>GESTIÓN DE VENTAS</h2>
+      <span>Usuario: <b id="topbarUser">Invitado</b></span>
+    </div>
 
-            <label for="fechaVenta">Fecha:</label>
-            <input type="date" id="fechaVenta" required />
+    <!-- BOTÓN NUEVA VENTA -->
+    <button id="btnNuevaVenta" class="nuevo-btn">➕ Nueva Venta</button>
 
-            <label for="estadoVenta">Estado:</label>
-            <select id="estadoVenta" required>
-              <option value="Pendiente">Pendiente</option>
-              <option value="Pagado">Pagado</option>
-              <option value="Cancelado">Cancelado</option>
-            </select>
+    <!-- FORMULARIO -->
+    <div id="formularioVenta" style="display:none; margin-top:20px;">
 
-            <hr style="margin: 15px 0; border: 1px solid #ddd;">
-            
-            <!-- SECCIÓN CORREGIDA: Añadir artículos al carrito de venta -->
-            <h4 style="margin-bottom: 10px; color: #555;">Añadir artículos a la venta</h4>
-            <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 15px;">
-              <div>
-                <label for="idProducto">Seleccione Producto:</label>
-                <!-- Cambiado de input de texto a select para carga dinámica desde el JS -->
-                <select id="idProducto" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; height: 40px;" required>
-                  <option value="">-- Seleccione un producto --</option>
-                </select>
-              </div>
-              <div>
-                <label for="cantidadProducto">Cantidad:</label>
-                <input type="number" id="cantidadProducto" value="1" min="1" style="height: 40px; padding: 8px; width: 100%; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" />
-              </div>
-              <button type="button" id="btnAgregarProducto" class="nuevo-btn" style="margin: 0; height: 40px; background-color: #28a745;">
-                🛒 Añadir al carrito
-              </button>
-            </div>
+      <form id="formVenta">
 
-            <!-- Tabla de productos agregados -->
-            <div id="productosAgregados" style="margin-bottom: 15px; display: none;">
-              <label>Productos en esta venta:</label>
-              <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
-                <thead>
-                  <tr style="background: #f0f0f0;">
-                    <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Producto</th>
-                    <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Cant.</th>
-                    <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Precio Unit.</th>
-                    <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Subtotal</th>
-                    <th style="padding: 8px; text-align: center; border: 1px solid #ddd; width: 80px;">Acción</th>
-                  </tr>
-                </thead>
-                <tbody id="listaProductosVenta"></tbody>
-              </table>
-            </div>
+        <h3>Nueva Venta</h3>
 
-            <label for="totalVenta">Total:</label>
-            <input type="number" id="totalVenta" value="0" required readonly style="font-weight: bold; font-size: 1.1em;" />
+        <!-- CLIENTE -->
+        <label>ID Cliente</label>
+        <input type="text" id="idCliente" placeholder="ID cliente"/>
 
-            <label for="adminVenta">Administrador:</label>
-            <input type="text" id="adminVenta" value="Pepito Perez" required />
+        <label>Cliente</label>
+        <input type="text" id="clienteVenta" readonly/>
 
-            <button type="submit">Guardar</button>
-            <button type="button" id="cancelarVenta">Cancelar</button>
-          </form>
-        </div>
+        <!-- FECHA -->
+        <label>Fecha</label>
+        <input type="date" id="fechaVenta"/>
 
-        <!-- Filtro de búsqueda -->
-        <div class="filter-container">
-          <input type="text" id="filtroVentas" placeholder="🔍 Buscar ventas..." style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px;" />
-        </div>
+        <!-- ESTADO -->
+        <label>Estado</label>
+        <select id="estadoVenta">
+          <option value="Pendiente">Pendiente</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Cancelado">Cancelado</option>
+        </select>
 
-        <!-- Tabla de ventas -->
-        <table id="tablaVentas">
+        <hr>
+
+        <!-- PRODUCTOS -->
+        <h4>Productos</h4>
+
+        <select id="idProducto"></select>
+        <input type="number" id="cantidadProducto" value="1" min="1"/>
+
+        <button type="button" id="btnAgregarProducto">Agregar</button>
+
+        <!-- CARRITO -->
+        <table border="1" width="100%">
           <thead>
             <tr>
-              <th>Id Pedido</th>
-              <th>Cliente</th>
-              <th>Fecha</th>
-              <th>Estado</th>
-              <th>Total</th>
-              <th>Productos</th>
-              <th>Administrador</th>
-              <th>Acciones</th>
+              <th>Producto</th>
+              <th>Cant</th>
+              <th>Precio</th>
+              <th>Subtotal</th>
+              <th>Acción</th>
             </tr>
           </thead>
-          <tbody>
-            <!-- Las filas se agregarán dinámicamente -->
-          </tbody>
+          <tbody id="listaProductosVenta"></tbody>
         </table>
-        <div id="paginationVentas" class="pagination-container"></div>
 
-        <!-- Modal de Detalle de Venta -->
-        <div id="modalDetalleVenta" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-          <div class="modal-content" style="background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 800px; border-radius: 8px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-              <h2 style="margin: 0;">Detalle de Venta #<span id="detalleId"></span></h2>
-              <span class="close-modal" style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-              <div>
-                <p><strong>Cliente:</strong> <span id="detalleCliente"></span></p>
-                <p><strong>Fecha:</strong> <span id="detalleFecha"></span></p>
-                <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
-              </div>
-              <div>
-                <p><strong>Administrador:</strong> <span id="detalleAdmin"></span></p>
-                <p><strong>Total:</strong> <span id="detalleTotal" style="font-size: 1.2em; font-weight: bold;"></span></p>
-              </div>
-            </div>
+        <br>
 
-            <h3>Productos</h3>
-            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-              <thead>
-                <tr style="background: #f0f0f0;">
-                  <th style="padding: 8px; text-align: left; border: 1px solid #ddd;">Producto</th>
-                  <th style="padding: 8px; text-align: center; border: 1px solid #ddd;">Cantidad</th>
-                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Precio Unit.</th>
-                  <th style="padding: 8px; text-align: right; border: 1px solid #ddd;">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody id="detalleProductosBody"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
+        <!-- TOTAL -->
+        <label>Total</label>
+        <input type="number" id="totalVenta" readonly/>
 
-  <!-- Llamado al archivo JS externo -->
-  <script src="assets/js/user-display.js"></script>
-  <script src="assets/js/storage.js"></script>
-  <script src="assets/js/ui.js"></script>
-  <script src="assets/js/backend-check.js"></script>
-  <script src="assets/js/pagination.js"></script>
-  <script src="assets/js/ModuloVentas.js"></script>
+        <!-- ADMIN -->
+        <label>Administrador</label>
+        <input type="text" id="adminVenta" readonly/>
+
+        <br><br>
+
+        <button type="submit">Guardar Venta</button>
+        <button type="button" id="cancelarVenta">Cancelar</button>
+
+      </form>
+    </div>
+
+    <hr>
+
+    <!-- BUSCAR -->
+    <input type="text" id="filtroVentas" placeholder="Buscar ventas..."/>
+
+    <!-- TABLA -->
+    <table border="1" width="100%" id="tablaVentas">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Total</th>
+          <th>Productos</th>
+          <th>Admin</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+  </main>
+</div>
+
+<!-- JS -->
+<script src="assets/js/user-display.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/ModuloVentas.js"></script>
+
+<script>
+  // fecha automática
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('fechaVenta').value =
+      new Date().toISOString().split('T')[0];
+
+    const user = JSON.parse(localStorage.getItem('usuarioActivo') || '{}');
+    document.getElementById('topbarUser').textContent = user.nombre || 'Invitado';
+  });
+</script>
+
 </body>
 </html>

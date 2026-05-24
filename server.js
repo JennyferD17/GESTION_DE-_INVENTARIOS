@@ -270,7 +270,7 @@ app.post('/api/ventas', async (req, res) => {
   }
 });
 // ============================================
-// LOGIN REAL
+// LOGIN
 // ============================================
 
 const USUARIOS_FILE =
@@ -280,59 +280,54 @@ app.post('/api/login', async (req, res) => {
 
   try {
 
-    const {
-      usuario,
-      password
-    } = req.body;
+    const { email, password } = req.body;
 
-    const usuarios =
+    const data =
       await readFile(USUARIOS_FILE, []);
 
-    // BUSCAR USUARIO
-    const user = usuarios.find(u =>
+    // HASH PASSWORD
+    const passwordHash =
+      crypto
+        .createHash('sha256')
+        .update(password)
+        .digest('hex');
 
-      u.documento == usuario ||
-      u.correo == usuario
-    );
+    // BUSCAR USUARIO
+    const user =
+      data.find(u =>
+
+        u.correo === email &&
+        u.password === passwordHash &&
+        u.activo === true
+      );
 
     if (!user) {
 
       return res.status(401).json({
 
         success: false,
-
-        message: 'Usuario no encontrado'
+        message: 'Credenciales incorrectas'
       });
     }
 
-    // ENCRIPTAR PASSWORD
-    const hash = crypto
-      .createHash('sha256')
-      .update(password)
-      .digest('hex');
+    // ACTUALIZAR ÚLTIMO ACCESO
+    user.ultimoAcceso =
+      new Date().toISOString();
 
-    // VALIDAR PASSWORD
-    if (hash !== user.password) {
+    await writeFile(
+      USUARIOS_FILE,
+      data
+    );
 
-      return res.status(401).json({
-
-        success: false,
-
-        message: 'Contraseña incorrecta'
-      });
-    }
-
-    // LOGIN OK
     res.json({
 
       success: true,
 
-      usuario: {
+      user: {
 
         id: user.id,
-
         nombre: user.nombre,
-
+        correo: user.correo,
         rol: user.rol
       }
     });
@@ -344,7 +339,6 @@ app.post('/api/login', async (req, res) => {
     res.status(500).json({
 
       success: false,
-
       message: 'Error servidor'
     });
   }

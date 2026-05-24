@@ -351,6 +351,29 @@ app.post('/api/ventas', async (req, res) => {
   }
 });
 
+/ ============================================
+// CONFIGURACIÓN DE ARCHIVOS ESTÁTICOS Y RUTAS
+// ============================================
+
+// Middleware para servir archivos estáticos (HTML, JS, CSS) desde la carpeta 'public'
+app.use(express.static(path.join(__dirname, 'public')));
+
+/**
+ * GET /ping
+ * Endpoint de verificación para comprobar que el servidor está activo
+ */
+app.get('/ping', (req, res) => {
+  res.json({ ok: true, time: new Date().toISOString() });
+});
+
+/**
+ * GET /
+ * Ruta raíz - carga el archivo Login.html por defecto
+ */
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Login.html'));
+});
+
 // ============================================
 // INICIO DEL SERVIDOR
 // ============================================

@@ -270,37 +270,71 @@ app.post('/api/ventas', async (req, res) => {
   }
 });
 // ============================================
-// LOGIN
+// LOGIN REAL
 // ============================================
+
+const USUARIOS_FILE =
+  path.join(DATA_DIR, 'usuarios.json');
 
 app.post('/api/login', async (req, res) => {
 
   try {
 
-    const { usuario, password } = req.body;
+    const {
+      usuario,
+      password
+    } = req.body;
 
-    // USUARIO DEMO
-    if (
-      usuario === 'admin' &&
-      password === '1234'
-    ) {
+    const usuarios =
+      await readFile(USUARIOS_FILE, []);
 
-      return res.json({
+    // BUSCAR USUARIO
+    const user = usuarios.find(u =>
 
-        success: true,
+      u.documento == usuario ||
+      u.correo == usuario
+    );
 
-        usuario: {
-          nombre: 'Administrador',
-          rol: 'admin'
-        }
+    if (!user) {
+
+      return res.status(401).json({
+
+        success: false,
+
+        message: 'Usuario no encontrado'
       });
     }
 
-    res.status(401).json({
+    // ENCRIPTAR PASSWORD
+    const hash = crypto
+      .createHash('sha256')
+      .update(password)
+      .digest('hex');
 
-      success: false,
+    // VALIDAR PASSWORD
+    if (hash !== user.password) {
 
-      message: 'Usuario o contraseña incorrectos'
+      return res.status(401).json({
+
+        success: false,
+
+        message: 'Contraseña incorrecta'
+      });
+    }
+
+    // LOGIN OK
+    res.json({
+
+      success: true,
+
+      usuario: {
+
+        id: user.id,
+
+        nombre: user.nombre,
+
+        rol: user.rol
+      }
     });
 
   } catch (err) {

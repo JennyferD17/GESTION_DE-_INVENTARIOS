@@ -62,6 +62,18 @@ async function writeFile(file, data) {
   await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf8');
 }
 
+/ ============================================
+// FUNCIONES AUXILIARES
+// ============================================
+
+/**
+ * Genera un hash SHA-256 de una contraseña
+ * @param {string} password - Contraseña en texto plano
+ * @returns {string} Hash de la contraseña en formato hexadecimal
+ */
+function hashPassword(password) {
+  return crypto.createHash('sha256').update(password).digest('hex');
+}
 // ============================================
 // ENDPOINTS DE LA API - USUARIOS
 // ============================================

@@ -86,7 +86,9 @@ app.get('/api/clientes', async (req, res) => {
 app.get('/api/clientes/:id', async (req, res) => {
   const data = await readFile(CLIENTES_FILE, { clientes: [] });
 
-  const cliente = data.clientes.find(c => c.idCliente == req.params.id);
+ const cliente = data.clientes.find(
+  c => c.numeroDocumento == req.params.id
+);
 
   if (!cliente) {
     return res.status(404).json({ message: 'Cliente no encontrado' });

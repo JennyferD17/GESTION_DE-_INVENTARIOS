@@ -18,12 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let clientes = [];
   let carrito = [];
 
-  // usuario sesión
   const user = JSON.parse(localStorage.getItem('usuarioActivo') || '{}');
+
   admin.value = user.nombre || 'Admin';
   document.getElementById('topbarUser').textContent = user.nombre || 'Invitado';
 
-  // cargar datos
+  // =========================
+  // CARGAR DATOS
+  // =========================
   async function load() {
     const [p, c] = await Promise.all([
       fetch('/api/productos'),
@@ -41,19 +43,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   load();
 
-  // cliente
-  idCliente.addEventListener('blur', () => {
-    const c = clientes.find(x => x.idCliente == idCliente.value);
-    if (c) cliente.value = c.nombre;
-    else if (idCliente.value) {
-      if (confirm('Cliente no existe, crear?')) {
-        window.location.href = `ModuloCliente.html?nuevoId=${idCliente.value}`;
+  // =========================
+  // CLIENTE (SIN REDIRECCIÓN)
+  // =========================
+  idCliente.addEventListener('blur', async () => {
+
+    const id = idCliente.value.trim();
+    if (!id) return;
+
+    const res = await fetch(`/api/clientes/${id}`);
+
+    if (!res.ok) {
+      cliente.value = '';
+
+      // 🔥 SOLO AVISAR, NO SALIR
+      if (confirm('Cliente no existe. ¿Desea crearlo ahora?')) {
+
+        const nombre = prompt('Nombre del cliente:');
+
+        if (nombre) {
+          const nuevo = {
+            idCliente: crypto.randomUUID(),
+            nombre,
+            pedidos: 0,
+            comprado: 0
+          };
+
+          await fetch('/api/clientes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(nuevo)
+          });
+
+          clientes.push(nuevo);
+          cliente.value = nombre;
+        }
       }
+
+      return;
     }
+
+    const data = await res.json();
+    cliente.value = data.nombre;
   });
 
-  // agregar producto
+  // =========================
+  // AGREGAR PRODUCTO
+  // =========================
   document.getElementById('btnAgregarProducto').onclick = () => {
+
     const id = select.value;
     const cant = parseInt(cantidad.value || 1);
 
@@ -63,7 +101,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const ex = carrito.find(x => x.id == id);
 
     if (ex) ex.cantidad += cant;
-    else carrito.push({ id: p.id, nombre: p.nombre, precio: p.precio, cantidad: cant });
+    else carrito.push({
+      id: p.id,
+      nombre: p.nombre,
+      precio: Number(p.precio),
+      cantidad: cant
+    });
 
     render();
   };
@@ -95,7 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
     render();
   };
 
-  // guardar
+  // =========================
+  // GUARDAR VENTA
+  // =========================
   form.onsubmit = async (e) => {
     e.preventDefault();
 
@@ -115,9 +160,10 @@ document.addEventListener('DOMContentLoaded', () => {
       body: JSON.stringify(venta)
     });
 
+    const data = await res.json();
+
     if (!res.ok) {
-      const msg = await res.json();
-      return alert(msg.message || 'Error');
+      return alert(data.message || 'Error');
     }
 
     alert('Venta guardada');

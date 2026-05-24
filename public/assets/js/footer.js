@@ -11,13 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
       Todos los derechos reservados.
     </p>
 
-    <div class="footer-links">
-      <a href="#">Quiénes somos</a>
-      <a href="#">Equipo desarrollador</a>
-      <a href="#">Privacidad</a>
-      <a href="#">Contáctanos</a>
-    </div>
-
+   
     <p>
       Desarrollado por
       <strong>Jennyfer Díaz</strong>

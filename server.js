@@ -1,5 +1,5 @@
 // ============================================
-// SERVER INVENTARIOS PRO (ESTABLE)
+// SERVER INVENTARIOS PRO - ESTABLE
 // ============================================
 
 const express = require('express');
@@ -38,7 +38,6 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.sendStatus(204);
-
   next();
 });
 
@@ -63,7 +62,7 @@ async function writeFile(file, data) {
 }
 
 // ============================================
-// CLIENTES (NORMALIZADO Opción 1)
+// CLIENTES (NO TOCAR - FUNCIONANDO)
 // ============================================
 
 app.get('/api/clientes', async (req, res) => {
@@ -104,7 +103,7 @@ app.post('/api/clientes', async (req, res) => {
     if (!Array.isArray(data.clientes)) data.clientes = [];
 
     if (!cliente.nombre || !cliente.numeroDocumento || !cliente.tipoDocumento) {
-      return res.status(400).json({ success: false, message: 'Datos incompletos' });
+      return res.status(400).json({ success: false });
     }
 
     if (!cliente.idCliente) {
@@ -124,18 +123,14 @@ app.post('/api/clientes', async (req, res) => {
       data.clientes.push(cliente);
     } else {
       const index = data.clientes.findIndex(c => c.idCliente === cliente.idCliente);
-
       if (index !== -1) {
-        data.clientes[index] = {
-          ...data.clientes[index],
-          ...cliente
-        };
+        data.clientes[index] = { ...data.clientes[index], ...cliente };
       }
     }
 
     await writeFile(CLIENTES_FILE, data);
 
-    res.json({ success: true, message: 'Cliente guardado' });
+    res.json({ success: true });
 
   } catch (err) {
     console.error(err);
@@ -144,7 +139,7 @@ app.post('/api/clientes', async (req, res) => {
 });
 
 // ============================================
-// PRODUCTOS
+// PRODUCTOS (NO TOCAR)
 // ============================================
 
 app.get('/api/productos', async (req, res) => {
@@ -172,13 +167,12 @@ app.post('/api/productos', async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false });
   }
 });
 
 // ============================================
-// PROVEEDORES
+// PROVEEDORES (NO TOCAR)
 // ============================================
 
 app.get('/api/proveedores', async (req, res) => {
@@ -204,13 +198,12 @@ app.post('/api/proveedores', async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false });
   }
 });
 
 // ============================================
-// VENTAS (CON STOCK + CLIENTE)
+// VENTAS (ARREGLADO SIN ROMPER CLIENTES)
 // ============================================
 
 app.get('/api/ventas', async (req, res) => {
@@ -223,7 +216,7 @@ app.post('/api/ventas', async (req, res) => {
     const venta = req.body;
 
     if (!venta.idCliente || !venta.productos?.length) {
-      return res.status(400).json({ success: false, message: 'Datos incompletos' });
+      return res.status(400).json({ success: false });
     }
 
     const productosDB = await readFile(PRODUCTOS_FILE, { productos: [] });
@@ -235,13 +228,11 @@ app.post('/api/ventas', async (req, res) => {
       const prod = productosDB.productos.find(p => p.id == item.id);
 
       if (!prod) {
-        return res.status(404).json({ message: `Producto no existe ${item.nombre}` });
+        return res.status(404).json({ message: `Producto no existe` });
       }
 
       if ((prod.stock || 0) < item.cantidad) {
-        return res.status(400).json({
-          message: `Stock insuficiente en ${prod.nombre}`
-        });
+        return res.status(400).json({ message: `Stock insuficiente` });
       }
     }
 
@@ -259,17 +250,16 @@ app.post('/api/ventas', async (req, res) => {
 
     await writeFile(VENTAS_FILE, ventasDB);
 
-    // ACTUALIZAR CLIENTE
+    // ACTUALIZAR CLIENTE (SIN ROMPER CLIENTES)
     const cliente = clientesDB.clientes.find(c => c.idCliente == venta.idCliente);
 
     if (cliente) {
       cliente.pedidos = (cliente.pedidos || 0) + 1;
       cliente.comprado = (cliente.comprado || 0) + venta.total;
-
       await writeFile(CLIENTES_FILE, clientesDB);
     }
 
-    res.json({ success: true, message: 'Venta registrada correctamente' });
+    res.json({ success: true, message: 'Venta guardada' });
 
   } catch (err) {
     console.error(err);
@@ -278,15 +268,7 @@ app.post('/api/ventas', async (req, res) => {
 });
 
 // ============================================
-// PING
-// ============================================
-
-app.get('/ping', (req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
-});
-
-// ============================================
-// START SERVER
+// SERVER START
 // ============================================
 
 app.listen(port, () => {

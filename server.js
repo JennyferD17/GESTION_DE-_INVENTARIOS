@@ -62,7 +62,7 @@ async function writeFile(file, data) {
   await fs.writeFile(file, JSON.stringify(data, null, 2), 'utf8');
 }
 
-/ ============================================
+// ============================================
 // FUNCIONES AUXILIARES
 // ============================================
 

@@ -16,6 +16,7 @@ const port = process.env.PORT || 3000;
 
 const DATA_DIR = path.join(__dirname, 'data');
 
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const PRODUCTOS_FILE = path.join(DATA_DIR, 'productos.json');
 const CLIENTES_FILE = path.join(DATA_DIR, 'clientes.json');
 const PROVEEDORES_FILE = path.join(DATA_DIR, 'proveedores.json');

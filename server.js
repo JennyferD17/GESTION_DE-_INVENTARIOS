@@ -152,11 +152,6 @@ app.post('/api/clientes', async (req, res) => {
 // VENTAS (CORREGIDO)
 // ============================================
 
-app.get('/api/ventas', async (req, res) => {
-  const data = await readFile(VENTAS_FILE, { ventas: [] });
-  res.json(data.ventas);
-});
-
 app.post('/api/ventas', async (req, res) => {
   try {
     const venta = req.body;
@@ -168,31 +163,84 @@ app.post('/api/ventas', async (req, res) => {
       });
     }
 
-    const data = await readFile(VENTAS_FILE, { ventas: [] });
+    // =========================
+    // CARGAR DATOS
+    // =========================
+    const dataVentas = await readFile(VENTAS_FILE, { ventas: [] });
+    const dataProductos = await readFile(PRODUCTOS_FILE, { productos: [] });
+    const dataClientes = await readFile(CLIENTES_FILE, { clientes: [] });
 
-    venta.id = Date.now();
-    data.ventas.push(venta);
+    // =========================
+    // 🔥 VALIDAR STOCK (NUEVO)
+    // =========================
+    for (const item of venta.productos) {
+      const producto = dataProductos.productos.find(p => p.id == item.id);
 
-    await writeFile(VENTAS_FILE, data);
+      if (!producto) {
+        return res.status(404).json({
+          success: false,
+          message: `Producto no existe: ${item.nombre}`
+        });
+      }
 
-    // actualizar cliente
-    const clientes = await readFile(CLIENTES_FILE, { clientes: [] });
-
-    const c = clientes.clientes.find(x => x.idCliente === venta.idCliente);
-
-    if (c) {
-      c.pedidos = (c.pedidos || 0) + 1;
-      c.comprado = (c.comprado || 0) + venta.total;
-      await writeFile(CLIENTES_FILE, clientes);
+      if ((producto.stock || 0) < item.cantidad) {
+        return res.status(400).json({
+          success: false,
+          message: `Stock insuficiente en ${producto.nombre}`
+        });
+      }
     }
 
-    res.json({ success: true });
+    // =========================
+    // 🔥 DESCONTAR STOCK (NUEVO)
+    // =========================
+    for (const item of venta.productos) {
+      const producto = dataProductos.productos.find(p => p.id == item.id);
 
-  } catch (e) {
-    res.status(500).json({ success: false });
+      if (producto) {
+        producto.stock -= item.cantidad;
+
+        if (producto.stock < 0) producto.stock = 0;
+      }
+    }
+
+    await writeFile(PRODUCTOS_FILE, dataProductos);
+
+    // =========================
+    // GUARDAR VENTA
+    // =========================
+    venta.id = Date.now();
+    dataVentas.ventas.push(venta);
+
+    await writeFile(VENTAS_FILE, dataVentas);
+
+    // =========================
+    // ACTUALIZAR CLIENTE
+    // =========================
+    const cliente = dataClientes.clientes.find(
+      c => c.idCliente === venta.idCliente
+    );
+
+    if (cliente) {
+      cliente.pedidos = (cliente.pedidos || 0) + 1;
+      cliente.comprado = (cliente.comprado || 0) + venta.total;
+
+      await writeFile(CLIENTES_FILE, dataClientes);
+    }
+
+    res.json({
+      success: true,
+      message: 'Venta registrada correctamente'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error en venta'
+    });
   }
 });
-
 // ============================================
 // PRODUCTOS
 // ============================================

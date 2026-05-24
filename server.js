@@ -269,7 +269,52 @@ app.post('/api/ventas', async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
+// ============================================
+// LOGIN
+// ============================================
 
+app.post('/api/login', async (req, res) => {
+
+  try {
+
+    const { usuario, password } = req.body;
+
+    // USUARIO DEMO
+    if (
+      usuario === 'admin' &&
+      password === '1234'
+    ) {
+
+      return res.json({
+
+        success: true,
+
+        usuario: {
+          nombre: 'Administrador',
+          rol: 'admin'
+        }
+      });
+    }
+
+    res.status(401).json({
+
+      success: false,
+
+      message: 'Usuario o contraseña incorrectos'
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+
+      success: false,
+
+      message: 'Error servidor'
+    });
+  }
+});
 // ============================================
 // SERVER START
 // ============================================

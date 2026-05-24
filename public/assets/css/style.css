@@ -16,7 +16,7 @@ body {
   background: #fff;
   color: #222;
   display: flex;
-  flex-direction: row
+  flex-direction: column;
 }
 
 /* Diseño dividido: login */

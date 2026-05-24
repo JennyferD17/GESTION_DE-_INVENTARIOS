@@ -109,28 +109,32 @@
     <!-- BUSCAR -->
     <input type="text" id="filtroVentas" placeholder="Buscar ventas..."/>
 
-    <!-- TABLA -->
-    <table border="1" width="100%" id="tablaVentas">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Cliente</th>
-          <th>Fecha</th>
-          <th>Estado</th>
-          <th>Total</th>
-          <th>Productos</th>
-          <th>Admin</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-
-  </main>
-</div>
+    <!-- Tabla de ventas -->
+        <table id="tablaVentas">
+          <thead>
+            <tr>
+              <th>Id Pedido</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th>Total</th>
+              <th>Productos</th>
+              <th>Administrador</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Las filas se agregarán dinámicamente -->
+          </tbody>
+        </table>
+        <div id="paginationVentas" class="pagination-container"></div>
 
 <!-- JS -->
-<script src="assets/js/user-display.js"></script>
-<script src="assets/js/ui.js"></script>
+script src="assets/js/user-display.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/backend-check.js"></script>
+  <script src="assets/js/pagination.js"></script>
 <script src="assets/js/ModuloVentas.js"></script>
 
 <script>

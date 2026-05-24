@@ -63,6 +63,87 @@ async function writeFile(file, data) {
 }
 
 // ============================================
+// ENDPOINTS DE LA API - USUARIOS
+// ============================================
+
+/**
+ * POST /api/register
+ * Registra un nuevo usuario en el sistema
+ * Valida que el correo no esté duplicado y hashea la contraseña
+ */
+app.post('/api/register', async (req, res) => {
+  const { nombre, documento, correo, telefono, password } = req.body || {};
+
+  // Validar que todos los campos requeridos estén presentes
+  if (!nombre || !documento || !correo || !telefono || !password) {
+    return res.status(400).json({ success: false, message: 'Faltan campos requeridos.' });
+  }
+
+  const users = await readFile(USERS_FILE, []);
+
+  // Verificar si el correo ya está registrado
+  const exists = users.find(u => u.correo && u.correo.toLowerCase() === correo.toLowerCase());
+  if (exists) {
+    return res.status(409).json({ success: false, message: 'El correo ya está registrado.' });
+  }
+
+  // Crear nuevo usuario con contraseña hasheada
+  const newUser = {
+    id: Date.now(),
+    nombre,
+    documento,
+    correo: correo.toLowerCase(),
+    telefono,
+    password: hashPassword(password),
+    createdAt: new Date().toISOString()
+  };
+
+  users.push(newUser);
+  await writeFile(USERS_FILE, users);
+
+  return res.json({ success: true, message: 'Usuario registrado correctamente.' });
+});
+
+/**
+ * POST /api/login
+ * Autentica un usuario verificando email y contraseña
+ * Devuelve datos del usuario (sin contraseña) si la autenticación es exitosa
+ */
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body || {};
+
+  // Validar campos requeridos
+  if (!email || !password) {
+    return res.status(400).json({ success: false, message: 'Faltan campos.' });
+  }
+
+  const users = await readFile(USERS_FILE, []);
+  const user = users.find(u => u.correo === (email || '').toLowerCase());
+
+  if (!user) {
+    return res.status(401).json({ success: false, message: 'Usuario no encontrado.' });
+  }
+
+  // Verificar contraseña
+  if (user.password === hashPassword(password)) {
+    const safeUser = { id: user.id, nombre: user.nombre, correo: user.correo };
+    return res.json({ success: true, message: 'Login exitoso.', user: safeUser });
+  }
+
+  return res.status(401).json({ success: false, message: 'Contraseña incorrecta.' });
+});
+
+/**
+ * GET /api/users
+ * Obtiene la lista de todos los usuarios registrados
+ */
+app.get('/api/users', async (req, res) => {
+  const users = await readFile(USERS_FILE, []);
+  res.json({ success: true, usuarios: users });
+});
+
+
+// ============================================
 // CLIENTES (NO TOCAR - FUNCIONANDO)
 // ============================================
 
@@ -269,91 +350,7 @@ app.post('/api/ventas', async (req, res) => {
     res.status(500).json({ success: false });
   }
 });
-// ============================================
-// LOGIN
-// ============================================
 
-const USUARIOS_FILE =
-  path.join(DATA_DIR, 'usuarios.json');
-
-app.post('/api/login', async (req, res) => {
-
-  try {
-
-    const { email, password } = req.body;
-
-    const data =
-  await readFile(USUARIOS_FILE, []);
-
-const passwordHash =
-  crypto
-    .createHash('sha256')
-    .update(password)
-    .digest('hex');
-
-console.log(email);
-console.log(passwordHash);
-console.log(data);
-
-const user =
-  data.find(u =>
-
-    u.correo === email &&
-    u.password === passwordHash &&
-    u.activo === true
-  );
-
-    // BUSCAR USUARIO
-    const user =
-      data.find(u =>
-
-        u.correo === email &&
-        u.password === passwordHash &&
-        u.activo === true
-      );
-
-    if (!user) {
-
-      return res.status(401).json({
-
-        success: false,
-        message: 'Credenciales incorrectas'
-      });
-    }
-
-    // ACTUALIZAR ÚLTIMO ACCESO
-    user.ultimoAcceso =
-      new Date().toISOString();
-
-    await writeFile(
-      USUARIOS_FILE,
-      data
-    );
-
-    res.json({
-
-      success: true,
-
-      user: {
-
-        id: user.id,
-        nombre: user.nombre,
-        correo: user.correo,
-        rol: user.rol
-      }
-    });
-
-  } catch (err) {
-
-    console.error(err);
-
-    res.status(500).json({
-
-      success: false,
-      message: 'Error servidor'
-    });
-  }
-});
 // ============================================
 // SERVER START
 // ============================================

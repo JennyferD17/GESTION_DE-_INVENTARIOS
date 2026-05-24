@@ -352,9 +352,16 @@ app.post('/api/ventas', async (req, res) => {
 });
 
 // ============================================
-// SERVER START
+// INICIO DEL SERVIDOR
 // ============================================
 
-app.listen(port, () => {
-  console.log(`Servidor corriendo en puerto ${port}`);
+/**
+ * Inicia el servidor en el puerto especificado
+ * Escucha en todas las interfaces de red (0.0.0.0)
+ */
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Servidor iniciado en http://0.0.0.0:${port}`);
+  console.log('Puedes acceder usando:');
+  console.log(`- Local: http://localhost:${port}`);
+  console.log(`- Red local: http://<tu-ip-local>:${port}`);
 });

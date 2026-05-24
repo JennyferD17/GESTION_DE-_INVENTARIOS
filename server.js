@@ -283,14 +283,25 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
     const data =
-      await readFile(USUARIOS_FILE, []);
+  await readFile(USUARIOS_FILE, []);
 
-    // HASH PASSWORD
-    const passwordHash =
-      crypto
-        .createHash('sha256')
-        .update(password)
-        .digest('hex');
+const passwordHash =
+  crypto
+    .createHash('sha256')
+    .update(password)
+    .digest('hex');
+
+console.log(email);
+console.log(passwordHash);
+console.log(data);
+
+const user =
+  data.find(u =>
+
+    u.correo === email &&
+    u.password === passwordHash &&
+    u.activo === true
+  );
 
     // BUSCAR USUARIO
     const user =
